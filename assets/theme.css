@@ -425,3 +425,7 @@ body.pn-on{overflow-x:clip}
 .pn-bn.multi .pn-bn-i{flex:0 0 92%;scroll-snap-align:start}
 .pn-bn-i{box-shadow:5px 5px 0 var(--shc);border-radius:16px}
 @media(min-width:900px){.pn-bn.multi .pn-bn-i{flex-basis:70%}}
+
+/* v9: بنرها زیر هم */
+.pn-bn,.pn-bn.multi{display:grid;overflow:visible;gap:14px;padding:0}
+.pn-bn.multi .pn-bn-i{flex:none;width:auto}
