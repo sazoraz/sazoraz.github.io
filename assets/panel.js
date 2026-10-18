@@ -256,7 +256,7 @@
     document.body.classList.add('pn-on');
     var h = (location.hash || '').slice(1); if (TABS.some(function (t) { return t[0] === h; })) S.tab = h;
     var cached = load(); S.d = cached; render();
-    fetch('/data/announcements.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : { items: [] }; }).catch(function () { return { items: [] }; }).then(function (a) { S.ann = (a && a.items) || []; if (S.tab === 'board' || document.querySelector('.pn-side')) render(); });
+    fetch('/data/announcements.json?t=' + Math.floor(Date.now() / 30000), { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : { items: [] }; }).catch(function () { return { items: [] }; }).then(function (a) { S.ann = (a && a.items) || []; if (S.tab === 'board' || document.querySelector('.pn-side')) render(); });
     api('/api/panel').then(function (d) {
       var changed = !cached || JSON.stringify(cached) !== JSON.stringify(d);
       S.d = d; S.err = ''; save(); try { localStorage.setItem('sr_checked', String(Date.now())); } catch (e) {}
