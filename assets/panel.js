@@ -3,7 +3,7 @@
 (function () {
   'use strict';
   var SR, app, DAY = 864e5, CK = 'sr_panel';
-  var S = { tab: 'products', thread: null, compose: false, d: null, draft: { subject: '', body: '', reply: {} }, err: '' };
+  var S = { ann: null, tab: 'products', thread: null, compose: false, d: null, draft: { subject: '', body: '', reply: {} }, err: '' };
   var P = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
   var IC = {
     box: P + '<path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16"/></svg>',
@@ -14,10 +14,11 @@
     plus: P + '<path d="M12 5v14M5 12h14"/></svg>',
     send: P + '<path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg>',
     star: P + '<path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg>',
+    bell: P + '<path d="M6 9a6 6 0 0112 0c0 6 2 7 2 7H4s2-1 2-7z"/><path d="M10 20a2 2 0 004 0"/></svg>',
     out: P + '<path d="M9 21H5V3h4M16 17l5-5-5-5M21 12H9"/></svg>'
   };
-  var TABS = [['products', 'محصولات من', 'box'], ['messages', 'پیام‌ها', 'mail'], ['orders', 'سفارش‌ها', 'rec'], ['account', 'حساب', 'user']];
-  var ST = { pending: 'در انتظار تأیید', approved: 'تأیید شد', rejected: 'رد شد' };
+  var TABS = [['products', 'محصولات من', 'box'], ['messages', 'پیام‌ها', 'mail'], ['orders', 'سفارش‌ها', 'rec'], ['board', 'اعلانات', 'bell'], ['account', 'حساب', 'user']];
+  var ST = { pending: 'در حال تایید', approved: 'تایید شده', rejected: 'رد شده' };
 
   function el(t, c, x) { var e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; }
   function ic(n, c) { var s = el('span', 'ic' + (c ? ' ' + c : '')); s.innerHTML = IC[n]; return s; }
@@ -90,7 +91,7 @@
   function setTab(t) { S.tab = t; S.thread = null; S.compose = false; try { history.replaceState(null, '', '#' + t); } catch (e) {} render(); window.scrollTo(0, 0); }
   function tabsBar() {
     var w = el('div', 'pn-tabs'); w.setAttribute('role', 'tablist');
-    TABS.forEach(function (t) { var b = btn('', t[1], t[2], function () { setTab(t[0]); }); b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', S.tab === t[0] ? 'true' : 'false'); if (t[0] === 'messages' && S.d && unreadN()) b.appendChild(el('em', 'pn-bd', num(unreadN()))); w.appendChild(b); });
+    TABS.forEach(function (t) { var b = btn('', t[1], t[2], function () { setTab(t[0]); }); if (t[0] === 'board') b.className += ' pn-mob'; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', S.tab === t[0] ? 'true' : 'false'); if (t[0] === 'messages' && S.d && unreadN()) b.appendChild(el('em', 'pn-bd', num(unreadN()))); w.appendChild(b); });
     return w;
   }
   function bottomNav() {
@@ -118,9 +119,29 @@
     var s = SR.session(), me = S.d && S.d.me, w = el('div', 'pn-acc'), l = el('div', 'list');
     [['نام', me ? me.name : s.name], ['نام‌کاربری', '@' + s.username], ['ایمیل', me && me.email || '—'], ['عضویت از', me ? fd(me.created) : '—']].forEach(function (x) { var r = el('div', 'li'); r.appendChild(el('span', 'muted', x[0])); r.appendChild(el('b', null, x[1])); l.appendChild(r); });
     w.appendChild(l);
+    w.appendChild(editForm(me));
     w.appendChild(el('p', 'muted', 'کد بازیابی فقط هنگام ثبت‌نام (یا بعد از هر بازیابی) نمایش داده می‌شود و برای امنیت رمزشده نگهداری می‌شود؛ بنابراین قابل نمایش دوباره نیست.'));
     w.appendChild(btn('btn btn-dark', 'خروج از حساب', 'out', function () { SR.fetch('/api/logout', { method: 'POST' }).catch(function () {}).then(function () { wipe(); SR.logout(); location.replace('/'); }); }));
     return w;
+  }
+  function editForm(me) {
+    var s = SR.session(), f = el('form', 'fm pn-edit'); f.appendChild(el('h3', null, 'ویرایش حساب کاربری'));
+    function fld(lb, type, val, ac) { var l = el('label', null, lb), i = el('input'); i.type = type; i.value = val || ''; if (ac) i.autocomplete = ac; l.appendChild(i); f.appendChild(l); return i; }
+    var n = fld('نام نمایشی', 'text', me ? me.name : s.name); n.maxLength = 40;
+    var e = fld('ایمیل', 'email', me && me.email, 'email'); e.dir = 'ltr';
+    f.appendChild(el('h4', null, 'تغییر رمز عبور (اختیاری)'));
+    var o = fld('رمز فعلی', 'password', '', 'current-password'), np = fld('رمز جدید (حداقل ۸ نویسه)', 'password', '', 'new-password');
+    var nt = el('div', 'note-msg'), sb = btn('btn', 'ذخیرهٔ تغییرات', 'user'); sb.type = 'submit'; f.appendChild(nt); f.appendChild(sb);
+    f.onsubmit = function (ev) {
+      ev.preventDefault(); sb.disabled = true; nt.className = 'note-msg';
+      var body = { name: n.value.trim(), email: e.value.trim() }; if (np.value) { body.new_password = np.value; body.old_password = o.value; }
+      post('/api/profile', body).then(function (r) {
+        S.d.me.name = r.name; S.d.me.email = r.email; save(); var t = SR.session(); SR.login({ token: t.token, username: t.username, name: r.name });
+        o.value = np.value = ''; sb.disabled = false; nt.className = 'note-msg show ok'; nt.textContent = 'تغییرات ذخیره شد.';
+        var h = document.querySelector('.pn-who h1'); if (h) h.textContent = r.name;
+      }).catch(function (er) { sb.disabled = false; if (er.message !== '401') { nt.className = 'note-msg show err'; nt.textContent = er.message; } });
+    };
+    return f;
   }
   function skel(n) { var w = el('div', 'list'); for (var i = 0; i < n; i++) w.appendChild(el('div', 'sk sk-r')); return w; }
 
@@ -180,22 +201,43 @@
     };
     w.appendChild(f); return w;
   }
-  function side() {
-    var w = el('aside', 'pn-side'), b = el('section', 'box'); b.appendChild(el('h2', null, 'تابلو اعلانات'));
+  function annCard(a) {
+    var c = el('article', 'pn-an pn-an-' + a.type);
+    if (a.title) c.appendChild(el('h3', null, a.title));
+    var safe = function (u) { return /^(https:\/\/|\/)/.test(u || '') && !/^\/\//.test(u); };
+    if ((a.type === 'image' || a.type === 'gif') && safe(a.img)) {
+      var im = el('img'); im.src = a.img; im.alt = a.title || 'اعلان'; im.loading = 'lazy'; im.decoding = 'async';
+      if (safe(a.link)) { var l = el('a'); l.href = a.link; l.appendChild(im); c.appendChild(l); } else c.appendChild(im);
+    } else if (a.type === 'html' && a.code) {
+      var w = el('div', 'pn-frame'); var fr = el('iframe'); fr.setAttribute('sandbox', 'allow-scripts allow-popups'); fr.loading = 'lazy'; fr.title = a.title || 'اعلان'; fr.style.height = Math.max(60, Math.min(1200, parseInt(a.height) || 260)) + 'px'; fr.srcdoc = a.code; w.appendChild(fr); c.appendChild(w);
+    }
+    if (a.text) c.appendChild(el('p', null, a.text));
+    if (a.type === 'text' && safe(a.link)) { var b = el('a', 'btn', a.btn || 'مشاهده'); b.href = a.link; c.appendChild(b); }
+    return c;
+  }
+  function annList() {
+    var w = el('div', 'pn-anl'), n = 0;
+    (S.ann || []).forEach(function (a) { if (a.on !== false) { w.appendChild(annCard(a)); n++; } });
     var ts = S.d ? threads().filter(function (t) { return t.bc; }).slice(0, 3) : [];
-    if (!ts.length) b.appendChild(el('p', 'muted', S.d ? 'اعلان تازه‌ای نیست.' : '...'));
-    ts.forEach(function (t) { var r = el('button', 'pn-sm' + (t.unread ? ' unread' : '')); r.type = 'button'; r.appendChild(el('b', null, t.subject)); r.appendChild(el('small', 'muted', t.last.body.slice(0, 50))); r.onclick = function () { S.tab = 'messages'; try { history.replaceState(null, '', '#messages'); } catch (e) {} openThread(t.id); }; b.appendChild(r); });
-    w.appendChild(b);
-    var s = el('section', 'box pn-help'); s.appendChild(el('h2', null, 'نیاز به کمک دارید؟')); s.appendChild(el('p', 'muted', 'سؤال یا مشکلتان را برای ما بنویسید؛ پاسخ در همین پنل می‌آید.'));
-    s.appendChild(btn('btn', 'ارسال پیام به پشتیبانی', 'send', function () { S.tab = 'messages'; S.compose = true; S.thread = null; render(); })); w.appendChild(s);
+    ts.forEach(function (t) { var r = el('button', 'pn-sm' + (t.unread ? ' unread' : '')); r.type = 'button'; r.appendChild(el('b', null, t.subject)); r.appendChild(el('small', 'muted', t.last.body.slice(0, 50))); r.onclick = function () { S.tab = 'messages'; S.thread = t.id; openThread(t.id); }; w.appendChild(r); n++; });
+    if (!n) w.appendChild(el('p', 'muted', S.d && S.ann ? 'اعلان تازه‌ای نیست.' : '...'));
     return w;
+  }
+  function helpBox() {
+    var s = el('section', 'box pn-help'); s.appendChild(el('h2', null, 'نیاز به کمک دارید؟')); s.appendChild(el('p', 'muted', 'سؤال یا مشکلتان را برای ما بنویسید؛ پاسخ در همین پنل می‌آید.'));
+    s.appendChild(btn('btn', 'ارسال پیام به پشتیبانی', 'send', function () { S.tab = 'messages'; S.compose = true; S.thread = null; render(); window.scrollTo(0, 0); })); return s;
+  }
+  function board() { var w = el('div', 'pn-board'); w.appendChild(el('h2', null, 'تابلو اعلانات')); w.appendChild(annList()); w.appendChild(helpBox()); return w; }
+  function side() {
+    var w = el('aside', 'pn-side'), b = el('section', 'box'); b.appendChild(el('h2', null, 'تابلو اعلانات')); b.appendChild(annList()); w.appendChild(b);
+    w.appendChild(helpBox()); return w;
   }
 
   function render() {
     app.textContent = '';
     app.appendChild(hero()); app.appendChild(metrics());
     var lay = el('div', 'pn-lay'), main = el('div', 'pn-main'); main.appendChild(tabsBar());
-    var c = el('section', 'box pn-c'); c.appendChild(S.tab === 'messages' ? mail() : S.tab === 'orders' ? orders() : S.tab === 'account' ? account() : products());
+    var c = el('section', 'box pn-c'); c.appendChild(S.tab === 'messages' ? mail() : S.tab === 'orders' ? orders() : S.tab === 'board' ? board() : S.tab === 'account' ? account() : products());
     if (S.err) c.insertBefore(el('p', 'muted', S.err), c.firstChild);
     main.appendChild(c); lay.appendChild(main); lay.appendChild(side()); app.appendChild(lay); app.appendChild(bottomNav());
   }
@@ -207,6 +249,7 @@
     document.body.classList.add('pn-on');
     var h = (location.hash || '').slice(1); if (TABS.some(function (t) { return t[0] === h; })) S.tab = h;
     var cached = load(); S.d = cached; render();
+    fetch('/data/announcements.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : { items: [] }; }).catch(function () { return { items: [] }; }).then(function (a) { S.ann = (a && a.items) || []; if (S.tab === 'board' || document.querySelector('.pn-side')) render(); });
     api('/api/panel').then(function (d) {
       var changed = !cached || JSON.stringify(cached) !== JSON.stringify(d);
       S.d = d; S.err = ''; save(); try { localStorage.setItem('sr_checked', String(Date.now())); } catch (e) {}
