@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>مدیریت اعلانات پنل</title>
+<link rel="stylesheet" href="/assets/theme.css">
+<style>
+body{padding:16px;max-width:720px;margin:0 auto}
+h1{font-size:20px;margin:6px 0 14px}h2{font-size:15px;margin:18px 0 8px;color:var(--c-compose)}
+.f{display:flex;flex-direction:column;gap:3px;margin-bottom:10px}.f>span{font-size:12px;color:#9aa3b5}
+.f input,.f textarea,.f select{background:#1b202c;border:2px solid #000;border-radius:9px;color:#fff;padding:9px 10px;font:inherit;width:100%}
+.f textarea{min-height:120px;direction:ltr;text-align:left}
+.b{padding:9px 14px;border-radius:10px;border:2.5px solid #000;background:#262c3b;color:#fff;font:inherit;font-weight:800;margin:2px}
+.b.p{background:var(--c-mix);color:#111}.b.d{background:#ff6b81}
+.it{background:#181b25;border:2px solid #000;border-radius:12px;padding:10px 12px;margin-bottom:8px;display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.it small{color:#9aa3b5}.off{opacity:.5}
+#st{white-space:pre-wrap;color:var(--c-mix);margin-top:8px;font-size:13px}
+.box2{background:#181b25;border:2px solid #000;border-radius:12px;padding:12px;margin-bottom:12px}
+.note{font-size:12px;color:#9aa3b5;line-height:1.9}
+#pv iframe{width:100%;border:0;background:#fff;border-radius:10px}#pv img{max-width:100%;border-radius:10px}
+</style></head><body>
+<h1>📢 اعلانات پنل کاربران</h1>
+<div class="note">هر اعلانی که اینجا «فعال» باشد، بعد از انتشار برای همهٔ کاربرانِ واردشده در «تابلو اعلانات» پنلشان دیده می‌شود.</div>
+<div class="box2">
+<h2>اتصال به گیت‌هاب</h2>
+<label class="f"><span>نام کاربری / سازمان</span><input id="gho"></label>
+<label class="f"><span>نام ریپازیتوری</span><input id="ghr"></label>
+<label class="f"><span>شاخه</span><input id="ghb" value="main"></label>
+<label class="f"><span>توکن</span><input id="ght" type="password"></label>
+<div class="note">همان اطلاعاتی که در صفحه‌ساز وارد می‌کنی؛ خودکار پر می‌شود.</div>
+</div>
+<h2>اعلان‌های فعلی</h2><div id="list"></div>
+<h2 id="ft">اعلان جدید</h2>
+<div class="box2" id="form">
+<label class="f"><span>نوع اعلان</span><select id="type"><option value="text">متن (با دکمهٔ اختیاری)</option><option value="image">عکس</option><option value="gif">گیف</option><option value="html">کد HTML/CSS/JS یا موشن‌گرافیک هوش مصنوعی</option></select></label>
+<label class="f"><span>تیتر</span><input id="title"></label>
+<label class="f"><span>متن (اختیاری)</span><textarea id="text" style="direction:rtl;text-align:right;min-height:70px"></textarea></label>
+<div id="gimg"><label class="f"><span>آدرس عکس/گیف (یا یک فایل از گوشی انتخاب کن)</span><input id="img" dir="ltr"></label><label class="f"><span>انتخاب فایل</span><input type="file" id="file" accept="image/*"></label></div>
+<div id="gcode"><label class="f"><span>کد کامل (HTML + CSS + JS؛ در قاب امن اجرا می‌شود)</span><textarea id="code"></textarea></label><label class="f"><span>ارتفاع (px)</span><input id="height" type="number" value="260"></label></div>
+<div id="glink"><label class="f"><span>لینک (اختیاری، با https:// یا /)</span><input id="link" dir="ltr"></label><label class="f" id="gbtn"><span>نوشتهٔ دکمه</span><input id="btn" value="مشاهده"></label></div>
+<button class="b" id="pvb">پیش‌نمایش</button><div id="pv"></div>
+<button class="b p" id="add">افزودن به فهرست</button>
+</div>
+<button class="b p" id="pub" style="width:100%;padding:14px">🚀 انتشار اعلانات</button><div id="st"></div>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)},items=[],edit=-1,upl=null;
+function gh(){try{return JSON.parse(localStorage.getItem('SR_GH')||'{}')}catch(e){return{}}}
+var g=gh();$('gho').value=g.o||'';$('ghr').value=g.r||'';$('ghb').value=g.b||'main';$('ght').value=g.t||'';
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+fetch('/data/announcements.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(d){if(d&&d.items)items=d.items;draw()}).catch(draw);
+var TN={text:'متن',image:'عکس',gif:'گیف',html:'کد/موشن'};
+function draw(){var l=$('list');l.innerHTML=items.length?'':'<div class="note">هنوز اعلانی نیست.</div>';
+ items.forEach(function(a,i){var d=document.createElement('div');d.className='it'+(a.on===false?' off':'');
+  d.innerHTML='<div><b>'+esc(a.title||'(بدون تیتر)')+'</b> <small>· '+TN[a.type]+(a.on===false?' · خاموش':'')+'</small></div><div><button class="b" data-a="t" data-i="'+i+'">'+(a.on===false?'روشن':'خاموش')+'</button><button class="b" data-a="e" data-i="'+i+'">ویرایش</button><button class="b" data-a="u" data-i="'+i+'">↑</button><button class="b d" data-a="x" data-i="'+i+'">حذف</button></div>';l.appendChild(d)})}
+$('list').onclick=function(e){var b=e.target.closest('button');if(!b)return;var i=+b.dataset.i,a=b.dataset.a;
+ if(a==='t')items[i].on=items[i].on===false;
+ if(a==='x'&&confirm('حذف شود؟'))items.splice(i,1);
+ if(a==='u'&&i>0){var t=items[i];items[i]=items[i-1];items[i-1]=t}
+ if(a==='e'){fill(items[i]);edit=i;$('ft').textContent='ویرایش اعلان';$('add').textContent='ذخیرهٔ ویرایش';scrollTo(0,document.body.scrollHeight/3)}
+ draw()};
+function sync(){var t=$('type').value;$('gimg').style.display=(t==='image'||t==='gif')?'':'none';$('gcode').style.display=t==='html'?'':'none';$('gbtn').style.display=t==='text'?'':'none';$('glink').style.display=t==='html'?'none':''}
+$('type').onchange=sync;sync();
+function fill(a){$('type').value=a.type;$('title').value=a.title||'';$('text').value=a.text||'';$('img').value=a.img||'';$('code').value=a.code||'';$('height').value=a.height||260;$('link').value=a.link||'';$('btn').value=a.btn||'مشاهده';upl=null;sync()}
+$('file').onchange=function(){var f=this.files[0];if(!f)return;if(f.size>3e6){alert('حجم فایل بیشتر از ۳ مگابایت است؛ کوچک‌ترش کن.');this.value='';return}
+ var r=new FileReader();r.onload=function(){var ext=(f.name.split('.').pop()||'png').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,5)||'png';upl={path:'assets/ann/a'+Date.now()+'.'+ext,b64:String(r.result).split(',')[1]};$('img').value='/'+upl.path};r.readAsDataURL(f)};
+function cur(){var t=$('type').value,a={id:'a'+Date.now(),type:t,title:$('title').value.trim(),text:$('text').value.trim(),on:true,date:Date.now()};
+ if(t==='image'||t==='gif')a.img=$('img').value.trim();
+ if(t==='html'){a.code=$('code').value;a.height=+$('height').value||260}
+ if(t==='text'||t==='image'||t==='gif'){a.link=$('link').value.trim();if(t==='text')a.btn=$('btn').value.trim()||'مشاهده'}
+ if(upl)a._up=upl;return a}
+$('pvb').onclick=function(){var a=cur(),p=$('pv');
+ if(a.type==='html')p.innerHTML='';var fr=document.createElement('iframe');fr.setAttribute('sandbox','allow-scripts allow-popups');fr.style.height=Math.max(60,Math.min(1200,a.height))+'px';fr.srcdoc=a.code;p.appendChild(fr);
+ else if(a.img){p.innerHTML='<img src="'+(upl?'data:image/*;base64,'+upl.b64:esc(a.img))+'" alt="">'}else p.innerHTML='<div class="note">'+esc(a.title+' — '+a.text)+'</div>'};
+$('add').onclick=function(){var a=cur();if(!a.title&&!a.text&&!a.img&&!a.code){alert('حداقل یک چیز وارد کن.');return}
+ if((a.type==='image'||a.type==='gif')&&!a.img){alert('عکس را انتخاب کن.');return}
+ if(edit>=0){a.id=items[edit].id;a.on=items[edit].on;items[edit]=a;edit=-1;$('ft').textContent='اعلان جدید';$('add').textContent='افزودن به فهرست'}else items.unshift(a);
+ ['title','text','img','code','link'].forEach(function(i){$(i).value=''});$('pv').innerHTML='';draw()};
+function b64(s){return btoa(unescape(encodeURIComponent(s)))}
+async function put(g,path,content,raw){
+ var u='https://api.github.com/repos/'+g.o+'/'+g.r+'/contents/'+path,h={Authorization:'Bearer '+g.t,Accept:'application/vnd.github+json'},sha;
+ var r=await fetch(u+'?ref='+encodeURIComponent(g.b),{headers:h});if(r.ok)sha=(await r.json()).sha;else if(r.status!==404)throw new Error(path+' → '+r.status);
+ var w=await fetch(u,{method:'PUT',headers:h,body:JSON.stringify({message:'update '+path,content:raw?content:b64(content),branch:g.b,sha:sha})});
+ if(!w.ok)throw new Error(path+' → '+w.status+' '+((await w.json().catch(function(){return{}})).message||''))}
+$('pub').onclick=async function(){var g={o:$('gho').value.trim(),r:$('ghr').value.trim(),b:$('ghb').value.trim()||'main',t:$('ght').value.trim()},st=$('st');
+ if(!g.o||!g.r||!g.t){st.textContent='اطلاعات گیت‌هاب را پر کن.';return}
+ localStorage.setItem('SR_GH',JSON.stringify(g));st.textContent='در حال ارسال...';
+ try{for(var i=0;i<items.length;i++){var a=items[i];if(a._up){await put(g,a._up.path,a._up.b64,true);st.textContent='عکس ✓';delete a._up}}
+  await put(g,'data/announcements.json',JSON.stringify({items:items},null,1));upl=null;
+  st.textContent='منتشر شد ✓ — بعد از حدود ۳۰ ثانیه در پنل کاربران دیده می‌شود.'}
+ catch(e){st.textContent='خطا: '+e.message}};
+})();
+</script></body></html>
