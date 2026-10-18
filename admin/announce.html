@@ -27,7 +27,7 @@ h1{font-size:20px;margin:6px 0 14px}h2{font-size:15px;margin:18px 0 8px;color:va
 <label class="f"><span>توکن</span><input id="ght" type="password"></label>
 <div class="note">همان اطلاعاتی که در صفحه‌ساز وارد می‌کنی؛ خودکار پر می‌شود.</div>
 </div>
-<h2>اعلان‌های فعلی</h2><div id="list"></div>
+<h2>اعلان‌های فعلی</h2><div class="note">ترتیب همین فهرست = ترتیب نمایش در پنل (اولی بالاترین). بعد از تغییر ترتیب، «انتشار اعلانات» را بزن.</div><div id="list"></div>
 <h2 id="ft">اعلان جدید</h2>
 <div class="box2" id="form">
 <label class="f"><span>نوع اعلان</span><select id="type"><option value="text">متن (با دکمهٔ اختیاری)</option><option value="image">عکس</option><option value="gif">گیف</option><option value="html">کد HTML/CSS/JS یا موشن‌گرافیک هوش مصنوعی</option></select></label>
@@ -57,11 +57,12 @@ load();
 var TN={text:'متن',image:'عکس',gif:'گیف',html:'کد/موشن'};
 function draw(){var l=$('list');l.innerHTML=items.length?'':'<div class="note">هنوز اعلانی نیست.</div>';
  items.forEach(function(a,i){var d=document.createElement('div');d.className='it'+(a.on===false?' off':'');
-  d.innerHTML='<div><b>'+esc(a.title||'(بدون تیتر)')+'</b> <small>· '+TN[a.type]+(a.on===false?' · خاموش':'')+'</small></div><div><button class="b" data-a="t" data-i="'+i+'">'+(a.on===false?'روشن':'خاموش')+'</button><button class="b" data-a="e" data-i="'+i+'">ویرایش</button><button class="b" data-a="u" data-i="'+i+'">↑</button><button class="b d" data-a="x" data-i="'+i+'">حذف</button></div>';l.appendChild(d)})}
+  d.innerHTML='<div><b>'+esc(a.title||'(بدون تیتر)')+'</b> <small>· '+TN[a.type]+(a.on===false?' · خاموش':'')+'</small></div><div><button class="b" data-a="t" data-i="'+i+'">'+(a.on===false?'روشن':'خاموش')+'</button><button class="b" data-a="e" data-i="'+i+'">ویرایش</button><button class="b" data-a="u" data-i="'+i+'">⬆ بالا</button><button class="b" data-a="dn" data-i="'+i+'">⬇ پایین</button><button class="b d" data-a="x" data-i="'+i+'">حذف</button></div>';l.appendChild(d)})}
 $('list').onclick=function(e){var b=e.target.closest('button');if(!b)return;var i=+b.dataset.i,a=b.dataset.a;
  if(a==='t')items[i].on=items[i].on===false;
  if(a==='x'&&confirm('حذف شود؟'))items.splice(i,1);
  if(a==='u'&&i>0){var t=items[i];items[i]=items[i-1];items[i-1]=t}
+ if(a==='dn'&&i<items.length-1){var t2=items[i];items[i]=items[i+1];items[i+1]=t2}
  if(a==='e'){fill(items[i]);edit=i;$('ft').textContent='ویرایش اعلان';$('add').textContent='ذخیرهٔ ویرایش';scrollTo(0,document.body.scrollHeight/3)}
  draw()};
 function sync(){var t=$('type').value;$('gimg').style.display=(t==='image'||t==='gif')?'':'none';$('gcode').style.display=t==='html'?'':'none';$('gbtn').style.display=t==='text'?'':'none';$('glink').style.display=t==='html'?'none':''}
