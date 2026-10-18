@@ -39,6 +39,7 @@ h1{font-size:20px;margin:6px 0 14px}h2{font-size:15px;margin:18px 0 8px;color:va
 <button class="b" id="pvb">پیش‌نمایش</button><div id="pv"></div>
 <button class="b p" id="add">افزودن به فهرست</button>
 </div>
+<button class="b" id="rl" style="width:100%">🔄 خواندن دوبارهٔ فهرست از گیت‌هاب</button>
 <button class="b p" id="pub" style="width:100%;padding:14px">🚀 انتشار اعلانات</button><div id="st"></div>
 <script>
 (function(){
@@ -46,7 +47,13 @@ var $=function(i){return document.getElementById(i)},items=[],edit=-1,upl=null;
 function gh(){try{return JSON.parse(localStorage.getItem('SR_GH')||'{}')}catch(e){return{}}}
 var g=gh();$('gho').value=g.o||'';$('ghr').value=g.r||'';$('ghb').value=g.b||'main';$('ght').value=g.t||'';
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-fetch('/data/announcements.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(d){if(d&&d.items)items=d.items;draw()}).catch(draw);
+async function ghRead(g){var r=await fetch('https://api.github.com/repos/'+g.o+'/'+g.r+'/contents/data/announcements.json?ref='+encodeURIComponent(g.b||'main')+'&t='+Date.now(),{headers:{Authorization:'Bearer '+g.t,Accept:'application/vnd.github.raw+json'},cache:'no-store'});
+ if(r.status===404)return{items:[]};if(!r.ok)throw new Error('GitHub '+r.status);return JSON.parse(await r.text())}
+async function load(){var g=gh(),d=null;
+ try{if(g.o&&g.r&&g.t){d=await ghRead(g);$('st').textContent='فهرست از گیت‌هاب خوانده شد ('+d.items.length+' اعلان).'}}catch(e){$('st').textContent='خواندن از گیت‌هاب نشد: '+e.message}
+ if(!d){try{var r=await fetch('/data/announcements.json?t='+Date.now(),{cache:'no-store'});if(r.ok)d=await r.json()}catch(e){}}
+ items=(d&&d.items)||[];draw()}
+load();
 var TN={text:'متن',image:'عکس',gif:'گیف',html:'کد/موشن'};
 function draw(){var l=$('list');l.innerHTML=items.length?'':'<div class="note">هنوز اعلانی نیست.</div>';
  items.forEach(function(a,i){var d=document.createElement('div');d.className='it'+(a.on===false?' off':'');
@@ -80,12 +87,13 @@ async function put(g,path,content,raw){
  var r=await fetch(u+'?ref='+encodeURIComponent(g.b),{headers:h});if(r.ok)sha=(await r.json()).sha;else if(r.status!==404)throw new Error(path+' → '+r.status);
  var w=await fetch(u,{method:'PUT',headers:h,body:JSON.stringify({message:'update '+path,content:raw?content:b64(content),branch:g.b,sha:sha})});
  if(!w.ok)throw new Error(path+' → '+w.status+' '+((await w.json().catch(function(){return{}})).message||''))}
+$('rl').onclick=function(){var g={o:$('gho').value.trim(),r:$('ghr').value.trim(),b:$('ghb').value.trim()||'main',t:$('ght').value.trim()};if(!g.t){$('st').textContent='اول توکن را وارد کن.';return}localStorage.setItem('SR_GH',JSON.stringify(g));load()};
 $('pub').onclick=async function(){var g={o:$('gho').value.trim(),r:$('ghr').value.trim(),b:$('ghb').value.trim()||'main',t:$('ght').value.trim()},st=$('st');
  if(!g.o||!g.r||!g.t){st.textContent='اطلاعات گیت‌هاب را پر کن.';return}
  localStorage.setItem('SR_GH',JSON.stringify(g));st.textContent='در حال ارسال...';
  try{for(var i=0;i<items.length;i++){var a=items[i];if(a._up){await put(g,a._up.path,a._up.b64,true);st.textContent='عکس ✓';delete a._up}}
   await put(g,'data/announcements.json',JSON.stringify({items:items},null,1));upl=null;
-  st.textContent='منتشر شد ✓ — بعد از حدود ۳۰ ثانیه در پنل کاربران دیده می‌شود.'}
+  var chk=await ghRead(g);st.textContent='منتشر شد ✓ — '+chk.items.length+' اعلان در گیت‌هاب ذخیره شد. حدود ۱ تا ۲ دقیقه بعد در پنل کاربران دیده می‌شود (صبر کن، فهرست همین صفحه را دوباره خالی نبین: خواندنش از گیت‌هاب است).'}
  catch(e){st.textContent='خطا: '+e.message}};
 })();
 </script></body></html>
