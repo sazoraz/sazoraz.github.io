@@ -68,7 +68,7 @@ function cur(){var t=$('type').value,a={id:'a'+Date.now(),type:t,title:$('title'
  if(t==='text'||t==='image'||t==='gif'){a.link=$('link').value.trim();if(t==='text')a.btn=$('btn').value.trim()||'مشاهده'}
  if(upl)a._up=upl;return a}
 $('pvb').onclick=function(){var a=cur(),p=$('pv');
- if(a.type==='html')p.innerHTML='';var fr=document.createElement('iframe');fr.setAttribute('sandbox','allow-scripts allow-popups');fr.style.height=Math.max(60,Math.min(1200,a.height))+'px';fr.srcdoc=a.code;p.appendChild(fr);
+ if(a.type==='html'){p.innerHTML='';var fr=document.createElement('iframe');fr.setAttribute('sandbox','allow-scripts allow-popups');fr.style.height=Math.max(60,Math.min(1200,a.height))+'px';fr.srcdoc=a.code;p.appendChild(fr)}
  else if(a.img){p.innerHTML='<img src="'+(upl?'data:image/*;base64,'+upl.b64:esc(a.img))+'" alt="">'}else p.innerHTML='<div class="note">'+esc(a.title+' — '+a.text)+'</div>'};
 $('add').onclick=function(){var a=cur();if(!a.title&&!a.text&&!a.img&&!a.code){alert('حداقل یک چیز وارد کن.');return}
  if((a.type==='image'||a.type==='gif')&&!a.img){alert('عکس را انتخاب کن.');return}
