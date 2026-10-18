@@ -215,9 +215,9 @@
     if (a.type === 'text' && safe(a.link)) { var b = el('a', 'btn', a.btn || 'مشاهده'); b.href = a.link; c.appendChild(b); }
     return c;
   }
-  function annList() {
+  function annList(noAdmin) {
     var w = el('div', 'pn-anl'), n = 0;
-    (S.ann || []).forEach(function (a) { if (a.on !== false) { w.appendChild(annCard(a)); n++; } });
+    if (!noAdmin) (S.ann || []).forEach(function (a) { if (a.on !== false) { w.appendChild(annCard(a)); n++; } });
     var ts = S.d ? threads().filter(function (t) { return t.bc; }).slice(0, 3) : [];
     ts.forEach(function (t) { var r = el('button', 'pn-sm' + (t.unread ? ' unread' : '')); r.type = 'button'; r.appendChild(el('b', null, t.subject)); r.appendChild(el('small', 'muted', t.last.body.slice(0, 50))); r.onclick = function () { S.tab = 'messages'; S.thread = t.id; openThread(t.id); }; w.appendChild(r); n++; });
     if (!n) w.appendChild(el('p', 'muted', S.d && S.ann ? 'اعلان تازه‌ای نیست.' : '...'));
@@ -227,15 +227,22 @@
     var s = el('section', 'box pn-help'); s.appendChild(el('h2', null, 'نیاز به کمک دارید؟')); s.appendChild(el('p', 'muted', 'سؤال یا مشکلتان را برای ما بنویسید؛ پاسخ در همین پنل می‌آید.'));
     s.appendChild(btn('btn', 'ارسال پیام به پشتیبانی', 'send', function () { S.tab = 'messages'; S.compose = true; S.thread = null; render(); window.scrollTo(0, 0); })); return s;
   }
-  function board() { var w = el('div', 'pn-board'); w.appendChild(el('h2', null, 'تابلو اعلانات')); w.appendChild(annList()); w.appendChild(helpBox()); return w; }
+  function banners() {
+    var l = (S.ann || []).filter(function (a) { return a.on !== false; });
+    if (!l.length) return null;
+    var w = el('section', 'pn-bn' + (l.length > 1 ? ' multi' : '')); w.setAttribute('aria-label', 'اعلان');
+    l.forEach(function (a) { var c = annCard(a); c.className += ' pn-bn-i'; w.appendChild(c); });
+    return w;
+  }
+  function board() { var w = el('div', 'pn-board'); w.appendChild(el('h2', null, 'تابلو اعلانات')); w.appendChild(annList(true)); w.appendChild(helpBox()); return w; }
   function side() {
-    var w = el('aside', 'pn-side'), b = el('section', 'box'); b.appendChild(el('h2', null, 'تابلو اعلانات')); b.appendChild(annList()); w.appendChild(b);
+    var w = el('aside', 'pn-side'), b = el('section', 'box'); b.appendChild(el('h2', null, 'تابلو اعلانات')); b.appendChild(annList(true)); w.appendChild(b);
     w.appendChild(helpBox()); return w;
   }
 
   function render() {
     app.textContent = '';
-    app.appendChild(hero()); app.appendChild(metrics());
+    app.appendChild(hero()); var bn = banners(); if (bn) app.appendChild(bn); app.appendChild(metrics());
     var lay = el('div', 'pn-lay'), main = el('div', 'pn-main'); main.appendChild(tabsBar());
     var c = el('section', 'box pn-c'); c.appendChild(S.tab === 'messages' ? mail() : S.tab === 'orders' ? orders() : S.tab === 'board' ? board() : S.tab === 'account' ? account() : products());
     if (S.err) c.insertBefore(el('p', 'muted', S.err), c.firstChild);

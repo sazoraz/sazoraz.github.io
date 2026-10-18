@@ -425,3 +425,10 @@ body.pn-on{overflow-x:clip}
 .pn-edit input{width:100%}
 .pn-help{margin-top:4px}
 @media(min-width:900px){.pn-nav{display:none}.pn-tabs .pn-mob{display:none!important}.pn-board{display:none}.pn-nav{grid-template-columns:repeat(4,1fr)}}
+
+/* --- v7b: بنر اعلان بالای پنل --- */
+.pn-bn{display:grid;gap:12px;margin:16px 0 0}
+.pn-bn.multi{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;padding:2px 2px 10px;scrollbar-width:none}.pn-bn.multi::-webkit-scrollbar{display:none}
+.pn-bn.multi .pn-bn-i{flex:0 0 92%;scroll-snap-align:start}
+.pn-bn-i{box-shadow:5px 5px 0 var(--shc);border-radius:16px}
+@media(min-width:900px){.pn-bn.multi .pn-bn-i{flex-basis:70%}}
