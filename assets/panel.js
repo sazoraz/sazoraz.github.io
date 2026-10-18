@@ -17,7 +17,7 @@
     bell: P + '<path d="M6 9a6 6 0 0112 0c0 6 2 7 2 7H4s2-1 2-7z"/><path d="M10 20a2 2 0 004 0"/></svg>',
     out: P + '<path d="M9 21H5V3h4M16 17l5-5-5-5M21 12H9"/></svg>'
   };
-  var TABS = [['products', 'محصولات من', 'box'], ['messages', 'پیام‌ها', 'mail'], ['orders', 'سفارش‌ها', 'rec'], ['board', 'اعلانات', 'bell'], ['account', 'حساب', 'user']];
+  var TABS = [['products', 'محصولات من', 'box'], ['messages', 'پیام‌ها', 'mail'], ['orders', 'سفارش‌ها', 'rec'], ['account', 'حساب', 'user']];
   var ST = { pending: 'در حال تایید', approved: 'تایید شده', rejected: 'رد شده' };
 
   function el(t, c, x) { var e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; }
@@ -88,10 +88,10 @@
     });
     return w;
   }
-  function setTab(t) { S.tab = t; S.thread = null; S.compose = false; try { history.replaceState(null, '', '#' + t); } catch (e) {} render(); window.scrollTo(0, 0); }
+  function setTab(t) { S.tab = t; S.thread = null; S.compose = false; try { history.replaceState(null, '', '#' + t); } catch (e) {} render(); }
   function tabsBar() {
     var w = el('div', 'pn-tabs'); w.setAttribute('role', 'tablist');
-    TABS.forEach(function (t) { var b = btn('', t[1], t[2], function () { setTab(t[0]); }); if (t[0] === 'board') b.className += ' pn-mob'; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', S.tab === t[0] ? 'true' : 'false'); if (t[0] === 'messages' && S.d && unreadN()) b.appendChild(el('em', 'pn-bd', num(unreadN()))); w.appendChild(b); });
+    TABS.forEach(function (t) { var b = btn('', t[1], t[2], function () { setTab(t[0]); }); b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', S.tab === t[0] ? 'true' : 'false'); if (t[0] === 'messages' && S.d && unreadN()) b.appendChild(el('em', 'pn-bd', num(unreadN()))); w.appendChild(b); });
     return w;
   }
   function bottomNav() {
@@ -201,6 +201,7 @@
     };
     w.appendChild(f); return w;
   }
+  var FONT = '<style>@font-face{font-family:Vazirmatn;src:url(' + location.origin + '/assets/fonts/Vazirmatn.woff2) format("woff2");font-weight:100 900;font-display:swap}html,body{font-family:Vazirmatn,Tahoma,sans-serif}</style>';
   function annCard(a) {
     var c = el('article', 'pn-an pn-an-' + a.type);
     if (a.title) c.appendChild(el('h3', null, a.title));
@@ -209,23 +210,15 @@
       var im = el('img'); im.src = a.img; im.alt = a.title || 'اعلان'; im.loading = 'lazy'; im.decoding = 'async';
       if (safe(a.link)) { var l = el('a'); l.href = a.link; l.appendChild(im); c.appendChild(l); } else c.appendChild(im);
     } else if (a.type === 'html' && a.code) {
-      var w = el('div', 'pn-frame'); var fr = el('iframe'); fr.setAttribute('sandbox', 'allow-scripts allow-popups'); fr.loading = 'lazy'; fr.title = a.title || 'اعلان'; fr.style.height = Math.max(60, Math.min(1200, parseInt(a.height) || 260)) + 'px'; fr.srcdoc = a.code; w.appendChild(fr); c.appendChild(w);
+      var w = el('div', 'pn-frame'); var fr = el('iframe'); fr.setAttribute('sandbox', 'allow-scripts allow-popups'); fr.loading = 'lazy'; fr.title = a.title || 'اعلان'; fr.style.height = Math.max(60, Math.min(1200, parseInt(a.height) || 260)) + 'px'; fr.srcdoc = FONT + a.code; w.appendChild(fr); c.appendChild(w);
     }
     if (a.text) c.appendChild(el('p', null, a.text));
     if (a.type === 'text' && safe(a.link)) { var b = el('a', 'btn', a.btn || 'مشاهده'); b.href = a.link; c.appendChild(b); }
     return c;
   }
-  function annList(noAdmin) {
-    var w = el('div', 'pn-anl'), n = 0;
-    if (!noAdmin) (S.ann || []).forEach(function (a) { if (a.on !== false) { w.appendChild(annCard(a)); n++; } });
-    var ts = S.d ? threads().filter(function (t) { return t.bc; }).slice(0, 3) : [];
-    ts.forEach(function (t) { var r = el('button', 'pn-sm' + (t.unread ? ' unread' : '')); r.type = 'button'; r.appendChild(el('b', null, t.subject)); r.appendChild(el('small', 'muted', t.last.body.slice(0, 50))); r.onclick = function () { S.tab = 'messages'; S.thread = t.id; openThread(t.id); }; w.appendChild(r); n++; });
-    if (!n) w.appendChild(el('p', 'muted', S.d && S.ann ? 'اعلان تازه‌ای نیست.' : '...'));
-    return w;
-  }
   function helpBox() {
     var s = el('section', 'box pn-help'); s.appendChild(el('h2', null, 'نیاز به کمک دارید؟')); s.appendChild(el('p', 'muted', 'سؤال یا مشکلتان را برای ما بنویسید؛ پاسخ در همین پنل می‌آید.'));
-    s.appendChild(btn('btn', 'ارسال پیام به پشتیبانی', 'send', function () { S.tab = 'messages'; S.compose = true; S.thread = null; render(); window.scrollTo(0, 0); })); return s;
+    s.appendChild(btn('btn', 'ارسال پیام به پشتیبانی', 'send', function () { S.tab = 'messages'; S.compose = true; S.thread = null; render(); })); return s;
   }
   function banners() {
     var l = (S.ann || []).filter(function (a) { return a.on !== false; });
@@ -234,19 +227,17 @@
     l.forEach(function (a) { var c = annCard(a); c.className += ' pn-bn-i'; w.appendChild(c); });
     return w;
   }
-  function board() { var w = el('div', 'pn-board'); w.appendChild(el('h2', null, 'تابلو اعلانات')); w.appendChild(annList(true)); w.appendChild(helpBox()); return w; }
-  function side() {
-    var w = el('aside', 'pn-side'), b = el('section', 'box'); b.appendChild(el('h2', null, 'تابلو اعلانات')); b.appendChild(annList(true)); w.appendChild(b);
-    w.appendChild(helpBox()); return w;
-  }
+  function side() { var w = el('aside', 'pn-side'); w.appendChild(helpBox()); return w; }
 
   function render() {
+    var y = window.pageYOffset, hh = app.offsetHeight; app.style.minHeight = hh + 'px';
     app.textContent = '';
     app.appendChild(hero()); var bn = banners(); if (bn) app.appendChild(bn); app.appendChild(metrics());
     var lay = el('div', 'pn-lay'), main = el('div', 'pn-main'); main.appendChild(tabsBar());
-    var c = el('section', 'box pn-c'); c.appendChild(S.tab === 'messages' ? mail() : S.tab === 'orders' ? orders() : S.tab === 'board' ? board() : S.tab === 'account' ? account() : products());
+    var c = el('section', 'box pn-c'); c.appendChild(S.tab === 'messages' ? mail() : S.tab === 'orders' ? orders() : S.tab === 'account' ? account() : products());
     if (S.err) c.insertBefore(el('p', 'muted', S.err), c.firstChild);
     main.appendChild(c); lay.appendChild(main); lay.appendChild(side()); app.appendChild(lay); app.appendChild(bottomNav());
+    window.scrollTo(0, y); app.style.minHeight = '';
   }
 
   function init() {
@@ -256,7 +247,7 @@
     document.body.classList.add('pn-on');
     var h = (location.hash || '').slice(1); if (TABS.some(function (t) { return t[0] === h; })) S.tab = h;
     var cached = load(); S.d = cached; render();
-    fetch('/data/announcements.json?t=' + Math.floor(Date.now() / 30000), { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : { items: [] }; }).catch(function () { return { items: [] }; }).then(function (a) { S.ann = (a && a.items) || []; if (S.tab === 'board' || document.querySelector('.pn-side')) render(); });
+    fetch('/data/announcements.json?t=' + Math.floor(Date.now() / 30000), { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : { items: [] }; }).catch(function () { return { items: [] }; }).then(function (a) { S.ann = (a && a.items) || []; if (S.ann.length) render(); });
     api('/api/panel').then(function (d) {
       var changed = !cached || JSON.stringify(cached) !== JSON.stringify(d);
       S.d = d; S.err = ''; save(); try { localStorage.setItem('sr_checked', String(Date.now())); } catch (e) {}
