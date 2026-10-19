@@ -241,7 +241,8 @@ async function aiFull(p){
   return callAI({model:AI.model,temperature:.2,messages:[{role:'system',content:sys},{role:'user',content:'عنوان: '+p.title+'\n\n'+blocksText(p.blocks)}]});
 }
 var OK={heading:['level','text'],paragraph:['text'],list:['text'],highlight:['label','text'],button:['label','href'],image:['src','alt','caption'],video:['url','title'],aparat:['url','title'],soundcloud:['url','title'],audio:['src','title','dl'],divider:[],embed:['code','height','title']};
-function cleanBlocks(a){return(Array.isArray(a)?a:[]).filter(function(b){return b&&OK[b.t]}).map(function(b){var x={t:b.t,id:bid()};OK[b.t].forEach(function(k){if(b[k]!=null)x[k]=k==='level'?(+b[k]===3?3:2):k==='dl'?!!b[k]:String(b[k])});return x})}
+function fixLinks(t){return String(t).replace(/\[([^\]]+)\]\(([^)\s]*)\)/g,function(m,tx,h){return /^(https?:\/\/|\/(?!\/))/.test(h)?m:tx})}
+function cleanBlocks(a){return(Array.isArray(a)?a:[]).filter(function(b){return b&&OK[b.t]}).map(function(b){var x={t:b.t,id:bid()};OK[b.t].forEach(function(k){if(b[k]!=null)x[k]=k==='level'?(+b[k]===3?3:2):k==='dl'?!!b[k]:(k==='text'||k==='caption')?fixLinks(b[k]):String(b[k])});return x})}
 
 /* ---------- گام‌به‌گام ---------- */
 function slugFree(s){
@@ -319,7 +320,7 @@ function stepDecide(){
   app.onclick=function(e){var m=e.target.dataset.m;if(!m)return;app.onclick=null;if(m==='skip'){ST.skipped++;ST.qi++;return stepDecide()}if(m==='stop')return finish();stepPrepare(m)};
 }
 async function stepPrepare(mode){
-  var c=ST.cur,p=c.p,o={slug:'',cat:CATMAP[p.cats[0]]||newCatFor(p.cats),title:p.title,desc:'',tag:'',img:'',imgAlt:p.imgAlt||'',date:(p.date||'').slice(0,10)||today(),updated:(p.modified||'').slice(0,10)||'',author:R.POST_DEFAULT.author,comments:true,blocks:clone(c.conv.blocks),related:[],align:'justify',seo:{title:p.seoTitle||'',desc:p.seoDesc||'',noindex:false,kw:p.kw||''}};
+  var c=ST.cur,p=c.p,o={slug:'',cat:CATMAP[p.cats[0]]||newCatFor(p.cats),title:p.title,desc:'',tag:'',img:'',imgAlt:p.imgAlt||'',date:(p.date||'').slice(0,10)||today(),updated:(p.modified||'').slice(0,10)||'',author:(localStorage.getItem('SR_IMP_AUTH')||R.POST_DEFAULT.author),comments:true,blocks:clone(c.conv.blocks),related:[],align:'justify',seo:{title:p.seoTitle||'',desc:p.seoDesc||'',noindex:false,kw:p.kw||''}};
   c.mode=mode;c.o=o;
   app.innerHTML='<div class="box2"><b>در حال آماده‌سازی «'+esc(p.title)+'»...</b></div>';
   try{
@@ -372,11 +373,13 @@ function stepReview(){
   '<label class="f"><span>توضیح متا (سئو)</span><textarea id="rsd">'+esc(o.seo.desc)+'</textarea></label>'+
   '<label class="f"><span>کلمهٔ کلیدی</span><input id="rk" value="'+esc(o.seo.kw)+'"></label>'+
   '<label class="f"><span>برچسب</span><input id="rg" value="'+esc(o.tag)+'"></label>'+
+  '<label class="f"><span>نویسنده (کنار زمان مطالعه نمایش داده می‌شود)</span><input id="ra" value="'+esc(o.author||'')+'"></label>'+
   '<div class="note">آدرس قدیم: '+esc(p.link||'')+'<br>'+o.blocks.length+' بلوک</div>'+
-  '<div class="row"><button class="b" id="pvb">👁 پیش‌نمایش صفحه</button></div><div id="pvw"></div>'+
+  '<div class="row"><button class="b" id="pvb">👁 پیش‌نمایش صفحه</button><button class="b w" id="cmb">🔍 مقایسه با متن اصلی</button>'+(p.link?'<a class="b" href="'+esc(p.link)+'" target="_blank" rel="noopener" style="text-decoration:none">باز کردن مقالهٔ اصلی</a>':'')+'</div><div id="cmw"></div><div id="pvw"></div>'+
   '<div class="row"><button class="b p" id="pubb">✅ انتشار این مقاله</button><button class="b d" id="skb">منتقل نکن</button><button class="b" id="bkb">برگشت</button></div></div>';
-  function grab(){o.title=$('rt').value.trim();o.slug=$('rs').value.trim();o.cat=$('rc').value;o.date=$('rd').value.trim();o.desc=$('rx').value.trim();o.seo.title=$('rst').value.trim();o.seo.desc=$('rsd').value.trim();o.seo.kw=$('rk').value.trim();o.tag=$('rg').value.trim()}
-  $('pvb').onclick=function(){grab();var h='';try{h=R.postHtml(S,Object.assign(clone(o),{slug:o.slug||'x'}))}catch(e){h='<p>'+esc(e.message)+'</p>'}$('pvw').innerHTML='<iframe class="pv" sandbox="allow-scripts"></iframe>';$('pvw').firstChild.srcdoc=h};
+  function grab(){o.title=$('rt').value.trim();o.slug=$('rs').value.trim();o.cat=$('rc').value;o.date=$('rd').value.trim();o.desc=$('rx').value.trim();o.seo.title=$('rst').value.trim();o.seo.desc=$('rsd').value.trim();o.seo.kw=$('rk').value.trim();o.tag=$('rg').value.trim();o.author=$('ra').value.trim();try{localStorage.setItem('SR_IMP_AUTH',o.author)}catch(e){}}
+  $('pvb').onclick=function(){grab();var h='';try{h=R.postHtml(S,Object.assign(clone(o),{slug:o.slug||'x'}))}catch(e){h='<p>'+esc(e.message)+'</p>'}$('pvw').innerHTML='<iframe class="pv" sandbox="allow-scripts"></iframe>';$('pvw').firstChild.srcdoc=h.replace(/<head[^>]*>/i,function(m){return m+'<base href="'+location.origin+'/" target="_blank"><script>document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a");if(!a)return;var h=a.getAttribute("href")||"";if(h.charAt(0)==="#"){e.preventDefault();var t=document.getElementById(decodeURIComponent(h.slice(1)));if(t)t.scrollIntoView({behavior:"smooth"})}})<\/script>'})};
+  $('cmb').onclick=function(){var w=$('cmw');if(w.innerHTML){w.innerHTML='';return}var nz=function(bl){return blocksText(bl.map(function(b){return b.t==='image'?{t:'image',src:'',alt:b.alt||'',caption:b.caption||''}:b}))};w.innerHTML=diffHtml(nz(c.conv.blocks),nz(o.blocks))};
   $('skb').onclick=function(){ST.skipped++;ST.qi++;stepDecide()};
   $('bkb').onclick=stepDecide;
   $('pubb').onclick=async function(){
@@ -401,6 +404,18 @@ async function publishOne(o,p){
   DONE[p.id]=href;W('SR_IMP_DONE',DONE);
   ST.redirects.push({from:p.link,to:href});
   log('✓ منتشر شد: '+href);
+}
+function diffHtml(a,b){
+  var A=a.split(/(\s+)/).filter(function(x){return x&&!/^\s+$/.test(x)}),B=b.split(/(\s+)/).filter(function(x){return x&&!/^\s+$/.test(x)});
+  var legend='<div class="note">مقایسه: <ins style="background:#1f5f3f;text-decoration:none;padding:0 2px">سبز = اضافه‌شده</ins> · <del style="background:#6a2230;padding:0 2px">قرمز = حذف‌شده از اصل</del></div>';
+  if(A.length*B.length>9e6)return legend+'<div class="note warn">متن خیلی بلند است؛ مقایسهٔ کلمه‌به‌کلمه ممکن نیست. متن اصلی:</div><textarea readonly style="width:100%;min-height:200px;background:#1b202c;color:#fff;border:2px solid #000;border-radius:9px;padding:8px">'+esc(a)+'</textarea>';
+  var n=A.length,m=B.length,W=m+1,L=new Uint16Array((n+1)*W),i,j;
+  for(i=n-1;i>=0;i--)for(j=m-1;j>=0;j--)L[i*W+j]=A[i]===B[j]?L[(i+1)*W+j+1]+1:Math.max(L[(i+1)*W+j],L[i*W+j+1]);
+  var o='';i=0;j=0;
+  while(i<n&&j<m){if(A[i]===B[j]){o+=esc(A[i])+' ';i++;j++}else if(L[(i+1)*W+j]>=L[i*W+j+1]){o+='<del style="background:#6a2230">'+esc(A[i])+'</del> ';i++}else{o+='<ins style="background:#1f5f3f;text-decoration:none">'+esc(B[j])+'</ins> ';j++}}
+  while(i<n){o+='<del style="background:#6a2230">'+esc(A[i++])+'</del> '}while(j<m){o+='<ins style="background:#1f5f3f;text-decoration:none">'+esc(B[j++])+'</ins> '}
+  var same=(a.trim()===b.trim());
+  return legend+(same?'<div class="note">متن تغییری نکرده است.</div>':'')+'<div class="box2" style="white-space:pre-wrap;line-height:2.1;max-height:420px;overflow:auto">'+o+'</div>';
 }
 function oldPath(link){try{var u=new URL(link);return safeDec(u.pathname)}catch(e){return''}}
 async function finish(){
