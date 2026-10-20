@@ -93,7 +93,7 @@ function FL(path,label,type,extra){return F(path,label,type==='ltr'?'text':type,
 /* ----- بلوک‌ها ----- */
 var BF={
  paragraph:[['text','متن (بین پاراگراف‌ها یک خط خالی بگذار؛ **پررنگ** و [متن](لینک) پشتیبانی می‌شود)','area']],
- heading:[['text','عنوان'],['level','اندازه','sel',[[2,'بزرگ (H2)'],[3,'کوچک (H3)']]]],
+ heading:[['text','عنوان'],['level','سطح عنوان','sel',[[2,'H2 — بخش اصلی'],[3,'H3 — زیربخش'],[4,'H4'],[5,'H5'],[6,'H6']]]],
  image:[['src','آدرس تصویر','img'],['alt','توضیح تصویر (برای سئو و نابینایان)'],['caption','زیرنویس (اختیاری)']],
  video:[['url','لینک ویدیوی یوتیوب'],['title','عنوان ویدیو']],
  soundcloud:[['url','لینک آهنگ در ساندکلاد (https://soundcloud.com/...)'],['title','عنوان']],
@@ -382,12 +382,12 @@ function aiSys(){
   var links=core.concat(SITEPOSTS).filter(function(p){return p.href&&p.title}).slice(0,60).map(function(p){return '- '+p.title+' → '+p.href}).join('\n');
   return 'تو ویراستار و متخصص سئوی فارسی برای یک پست‌ساز وب‌سایت هستی. متن خام یک مقاله می‌آید. فقط و فقط یک شیء JSON معتبر برگردان (بدون توضیح و بدون ```).\n'+
 'قالب: {"title":"","slug":"english-short-slug","desc":"","tag":"","seoTitle":"","seoDesc":"","kw":"","blocks":[...]}\n'+
-'انواع بلوک: {"t":"heading","level":2 یا 3,"text":""} ، {"t":"paragraph","text":""} ، {"t":"list","text":"هر خط یک مورد"} ، {"t":"highlight","label":"نکتهٔ مهم","text":""} ، {"t":"button","label":"","href":""} ، {"t":"image","src":"","alt":"","caption":""} ، {"t":"video","url":"لینک یوتیوب"} ، {"t":"aparat","url":"لینک آپارات"} ، {"t":"audio","src":"آدرس mp3","title":"","dl":true} ، {"t":"divider"}\n'+
+'انواع بلوک: {"t":"heading","level":عددی از 2 تا 6,"text":""} ، {"t":"paragraph","text":""} ، {"t":"list","text":"هر خط یک مورد"} ، {"t":"highlight","label":"نکتهٔ مهم","text":""} ، {"t":"button","label":"","href":""} ، {"t":"image","src":"","alt":"","caption":""} ، {"t":"video","url":"لینک یوتیوب"} ، {"t":"aparat","url":"لینک آپارات"} ، {"t":"audio","src":"آدرس mp3","title":"","dl":true} ، {"t":"divider"}\n'+
 'استانداردهای سئو که باید رعایت شود:\n'+
 '۱) title عنوان جذاب ۲۰ تا ۶۵ حرف؛ seoTitle حداکثر ۶۰ حرف و شامل کلمهٔ کلیدی؛ desc و seoDesc هر کدام ۱۲۰ تا ۱۶۰ حرف، روان، شامل کلمهٔ کلیدی و بدون تکرار کامل عنوان.\n'+
 '۲) kw یک عبارت اصلی طبیعی (۲ تا ۴ کلمه) باشد که دقیقاً در title، seoTitle، seoDesc، پاراگراف اول و حداقل یکی از headingها آمده باشد.\n'+
 '۳) slug فقط حروف انگلیسی کوچک، عدد و خط تیره، ۳ تا ۶ کلمه، ترجمهٔ مفهوم موضوع.\n'+
-'۴) ساختار: یک پاراگراف مقدمهٔ کوتاه که با کلمهٔ کلیدی شروع شود؛ سپس حداقل ۳ heading سطح ۲ (توصیفی و حاوی کلمات مرتبط) و در صورت نیاز زیرمجموعه با سطح ۳؛ هیچ سطحی را رد نکن. پاراگراف‌ها ۲ تا ۴ جمله؛ در یک بلوک می‌توانی چند پاراگراف با یک خط خالی بیاوری.\n'+
+'۴) ساختار: یک پاراگراف مقدمهٔ کوتاه که با کلمهٔ کلیدی شروع شود؛ سپس حداقل ۳ heading سطح ۲ (توصیفی و حاوی کلمات مرتبط). سلسله‌مراتب طبیعی بساز: زیربخش‌های هر بخش را با سطح ۳، و فقط در صورت نیاز واقعی زیر آن‌ها سطح ۴ و بعد ۵ و ۶؛ هرگز سطحی را رد نکن (مثلاً از ۲ مستقیم به ۴ نرو) و برای تزیین از سطح‌های پایین استفاده نکن. پاراگراف‌ها ۲ تا ۴ جمله؛ در یک بلوک می‌توانی چند پاراگراف با یک خط خالی بیاوری.\n'+
 '۵) نکتهٔ کلیدی/هشدار → highlight (کم، حداکثر ۳ بار)؛ موارد شمارشی → list؛ لینک‌ها به شکل [متن](https://...) حفظ شوند؛ آدرس تصویر/ویدیو/صوت داخل متن به بلوک مناسب تبدیل شود و برای هر تصویر alt فارسی توصیفی (شامل کلمهٔ کلیدی در صورت ارتباط) نوشته شود.\n'+
 '۶) در انتهای مقاله یک جمع‌بندی کوتاه (heading + paragraph) بیاور.\n'+
 '۷) متن و محتوای نویسنده را حفظ کن؛ چیزی از خودت نساز و حقیقتی اضافه نکن؛ فقط ساختار، تقسیم‌بندی و فیلدهای سئو را بهینه کن. اگر جملهٔ اضافهٔ تکراری یا محاوره‌ای واضح است می‌توانی ویرایش جزئی کنی.\n'+
@@ -449,7 +449,7 @@ function aiReport(){
 function aiApply(o,mode){
   var OK={heading:['level','text'],paragraph:['text'],list:['text'],highlight:['label','text'],button:['label','href'],image:['src','alt','caption'],video:['url','title'],aparat:['url','title'],audio:['src','title','dl'],divider:[]};
   var bl=(Array.isArray(o.blocks)?o.blocks:[]).filter(function(b){return b&&OK[b.t]}).map(function(b){
-    var x={t:b.t,id:bid()};OK[b.t].forEach(function(k){if(b[k]!=null)x[k]=k==='level'?(+b[k]===3?3:2):k==='dl'?!!b[k]:String(b[k])});return x});
+    var x={t:b.t,id:bid()};OK[b.t].forEach(function(k){if(b[k]!=null)x[k]=k==='level'?Math.max(2,Math.min(6,parseInt(b[k],10)||2)):k==='dl'?!!b[k]:String(b[k])});return x});
   if(!bl.length)throw new Error('بلوکی در پاسخ نبود.');
   if(mode==='replace')P.blocks=bl;else P.blocks=P.blocks.concat(bl);
   var rp=mode==='replace';

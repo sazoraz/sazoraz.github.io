@@ -74,13 +74,16 @@ function pageList(posts){
 
 /* ---------- گرفتن از سایت قدیم (مستقیم یا از طریق ورکر) ---------- */
 function workerApi(){return (S.site.api||R.DEFAULTS.site.api||'').replace(/\/$/,'')}
-async function fetchOld(url,asBlob){
-  var err;
-  try{var r=await fetch(url,{cache:'no-store'});if(r.ok)return r;err=new Error('خطای '+r.status)}catch(e){err=e}
+async function fetchOld(url,img){
+  var errs=[];
+  try{var r=await fetch(url,{cache:'no-store',referrerPolicy:'no-referrer'});if(r.ok)return r;errs.push('مستقیم: '+r.status)}catch(e){errs.push('مستقیم: مرورگر اجازه نداد (CORS)')}
   if(AI.pk&&workerApi()){
-    try{var r2=await fetch(workerApi()+'/api/wpfetch?u='+encodeURIComponent(url),{headers:{'X-Proxy-Key':AI.pk}});if(r2.ok)return r2;err=new Error('ورکر: خطای '+r2.status)}catch(e){err=e}
+    try{var r2=await fetch(workerApi()+'/api/wpfetch?u='+encodeURIComponent(url),{headers:{'X-Proxy-Key':AI.pk}});if(r2.ok)return r2;errs.push('ورکر: '+r2.status)}catch(e){errs.push('ورکر: وصل نشد')}
+  }else errs.push('ورکر: کلید پروکسی یا ورکر جدید تنظیم نیست');
+  if(img){
+    try{var r3=await fetch('https://wsrv.nl/?url='+encodeURIComponent(url.replace(/^https?:\/\//,''))+'&w=1600&output=webp&q=80');if(r3.ok&&/image/.test(r3.headers.get('Content-Type')||''))return r3;errs.push('سرویس واسط: '+r3.status)}catch(e){errs.push('سرویس واسط: وصل نشد')}
   }
-  throw err;
+  throw new Error(errs.join(' | '));
 }
 function normRest(p,cm){
   var emb=(p._embedded&&p._embedded['wp:featuredmedia']&&p._embedded['wp:featuredmedia'][0])||{},y=p.yoast_head_json||{};
@@ -150,7 +153,7 @@ function toBlocks(html){
     n.childNodes.forEach(function(c){
       if(c.nodeType===3){var tx=c.nodeValue.trim();if(tx)para(tx);return}
       if(c.nodeType!==1)return;var t=c.tagName.toLowerCase();
-      if(/^h[1-6]$/.test(t)){var ht=plain(c.innerHTML);if(ht)out.push({t:'heading',level:(t==='h1'||t==='h2')?2:3,text:ht});return}
+      if(/^h[1-6]$/.test(t)){var ht=plain(c.innerHTML);if(ht)out.push({t:'heading',level:(t==='h1'||t==='h2')?2:parseInt(t.charAt(1),10),text:ht});return}
       if(t==='p'){
         var imgs=c.querySelectorAll('img'),txt=inline(c).trim();
         if(!imgs.length){if(txt)para(txt);return}
@@ -235,14 +238,14 @@ function linksList(){
 }
 async function aiFull(p){
   var sys='تو ویراستار و متخصص سئوی فارسی هستی. متن یک مقاله می‌آید (ساختار با # و - و ![alt](src)). فقط یک JSON معتبر برگردان (بدون توضیح و بدون ```). قالب: {"title":"","slug":"","desc":"","tag":"","seoTitle":"","seoDesc":"","kw":"","blocks":[...]}\n'+
-  'انواع بلوک: {"t":"heading","level":2 یا 3,"text":""} ، {"t":"paragraph","text":""} ، {"t":"list","text":"هر خط یک مورد"} ، {"t":"highlight","label":"نکتهٔ مهم","text":""} ، {"t":"button","label":"","href":""} ، {"t":"image","src":"","alt":"","caption":""} ، {"t":"video","url":""} ، {"t":"aparat","url":""} ، {"t":"soundcloud","url":""} ، {"t":"audio","src":"","title":"","dl":true} ، {"t":"divider"}\n'+
-  'قواعد: '+SEO_RULES+' ساختار: مقدمهٔ کوتاهی که با کلمهٔ کلیدی شروع شود، حداقل ۳ heading سطح ۲ و در صورت نیاز سطح ۳، پاراگراف‌های ۲ تا ۴ جمله، جمع‌بندی کوتاه در پایان. آدرس‌های تصویر (src) را دقیقاً و بدون تغییر نگه دار و برای هر تصویر alt فارسی توصیفی بنویس. لینک‌ها به شکل [متن](آدرس) حفظ شوند. محتوا و مطلب نویسنده را حفظ کن؛ چیزی از خودت نساز؛ فقط ساختار، ویراستاری سبک و سئو را بهینه کن.\n'+
+  'انواع بلوک: {"t":"heading","level":عددی از 2 تا 6,"text":""} ، {"t":"paragraph","text":""} ، {"t":"list","text":"هر خط یک مورد"} ، {"t":"highlight","label":"نکتهٔ مهم","text":""} ، {"t":"button","label":"","href":""} ، {"t":"image","src":"","alt":"","caption":""} ، {"t":"video","url":""} ، {"t":"aparat","url":""} ، {"t":"soundcloud","url":""} ، {"t":"audio","src":"","title":"","dl":true} ، {"t":"divider"}\n'+
+  'قواعد: '+SEO_RULES+' ساختار: مقدمهٔ کوتاهی که با کلمهٔ کلیدی شروع شود، حداقل ۳ heading سطح ۲؛ زیربخش‌ها سطح ۳ و فقط در صورت نیاز واقعی سطح ۴ تا ۶ (سلسله‌مراتب طبیعی، هرگز سطحی را رد نکن)، پاراگراف‌های ۲ تا ۴ جمله، جمع‌بندی کوتاه در پایان. آدرس‌های تصویر (src) را دقیقاً و بدون تغییر نگه دار و برای هر تصویر alt فارسی توصیفی بنویس. لینک‌ها به شکل [متن](آدرس) حفظ شوند. محتوا و مطلب نویسنده را حفظ کن؛ چیزی از خودت نساز؛ فقط ساختار، ویراستاری سبک و سئو را بهینه کن.\n'+
   (linksList()?'لینک داخلی: ۱ تا ۳ مورد واقعاً مرتبط از فهرست زیر را با لنگر معنادار در متن بیاور؛ اگر مرتبط نبود نگذار:\n'+linksList():'');
   return callAI({model:AI.model,temperature:.2,messages:[{role:'system',content:sys},{role:'user',content:'عنوان: '+p.title+'\n\n'+blocksText(p.blocks)}]});
 }
 var OK={heading:['level','text'],paragraph:['text'],list:['text'],highlight:['label','text'],button:['label','href'],image:['src','alt','caption'],video:['url','title'],aparat:['url','title'],soundcloud:['url','title'],audio:['src','title','dl'],divider:[],embed:['code','height','title']};
 function fixLinks(t){return String(t).replace(/\[([^\]]+)\]\(([^)\s]*)\)/g,function(m,tx,h){return /^(https?:\/\/|\/(?!\/))/.test(h)?m:tx})}
-function cleanBlocks(a){return(Array.isArray(a)?a:[]).filter(function(b){return b&&OK[b.t]}).map(function(b){var x={t:b.t,id:bid()};OK[b.t].forEach(function(k){if(b[k]!=null)x[k]=k==='level'?(+b[k]===3?3:2):k==='dl'?!!b[k]:(k==='text'||k==='caption')?fixLinks(b[k]):String(b[k])});return x})}
+function cleanBlocks(a){return(Array.isArray(a)?a:[]).filter(function(b){return b&&OK[b.t]}).map(function(b){var x={t:b.t,id:bid()};OK[b.t].forEach(function(k){if(b[k]!=null)x[k]=k==='level'?Math.max(2,Math.min(6,parseInt(b[k],10)||2)):k==='dl'?!!b[k]:(k==='text'||k==='caption')?fixLinks(b[k]):String(b[k])});return x})}
 
 /* ---------- گام‌به‌گام ---------- */
 function slugFree(s){
@@ -347,7 +350,7 @@ async function stepPrepare(mode){
       for(var i=0;i<list.length;i++){
         log('تصویر '+(i+1)+' از '+list.length+'...');
         try{var nu=await moveImage(g,list[i].src,o.slug,n++,cache);if(list[i].cover)o.img=nu;else list[i].src=nu}
-        catch(e){warn.push('تصویر منتقل نشد و آدرس قدیم ماند: '+list[i].src.slice(0,70));if(list[i].cover)o.img=absUrl(list[i].src);else list[i].src=absUrl(list[i].src)}
+        catch(e){warn.push('تصویر منتقل نشد و آدرس قدیم ماند: '+list[i].src.slice(0,90)+' ← '+e.message);if(list[i].cover)o.img=absUrl(list[i].src);else list[i].src=absUrl(list[i].src)}
       }
     }else{if(p.img)o.img=absUrl(p.img);o.blocks.forEach(function(b){if(b.t==='image')b.src=absUrl(b.src)})}
     if(!o.img){var fi=o.blocks.filter(function(b){return b.t==='image'})[0];if(fi)o.img=fi.src}
@@ -374,11 +377,14 @@ function stepReview(){
   '<label class="f"><span>کلمهٔ کلیدی</span><input id="rk" value="'+esc(o.seo.kw)+'"></label>'+
   '<label class="f"><span>برچسب</span><input id="rg" value="'+esc(o.tag)+'"></label>'+
   '<label class="f"><span>نویسنده (کنار زمان مطالعه نمایش داده می‌شود)</span><input id="ra" value="'+esc(o.author||'')+'"></label>'+
+  '<details class="cat" open><summary><b>✏️ ویرایش متن مقاله ('+o.blocks.length+' بلوک)</b></summary><div id="bed"></div></details>'+
   '<div class="note">آدرس قدیم: '+esc(p.link||'')+'<br>'+o.blocks.length+' بلوک</div>'+
-  '<div class="row"><button class="b" id="pvb">👁 پیش‌نمایش صفحه</button><button class="b w" id="cmb">🔍 مقایسه با متن اصلی</button>'+(p.link?'<a class="b" href="'+esc(p.link)+'" target="_blank" rel="noopener" style="text-decoration:none">باز کردن مقالهٔ اصلی</a>':'')+'</div><div id="cmw"></div><div id="pvw"></div>'+
+  '<div class="row"><button class="b" id="rtb">🔁 تلاش دوباره برای تصاویر</button><button class="b" id="pvb">👁 پیش‌نمایش صفحه</button><button class="b w" id="cmb">🔍 مقایسه با متن اصلی</button>'+(p.link?'<a class="b" href="'+esc(p.link)+'" target="_blank" rel="noopener" style="text-decoration:none">باز کردن مقالهٔ اصلی</a>':'')+'</div><div id="cmw"></div><div id="pvw"></div>'+
   '<div class="row"><button class="b p" id="pubb">✅ انتشار این مقاله</button><button class="b d" id="skb">منتقل نکن</button><button class="b" id="bkb">برگشت</button></div></div>';
   function grab(){o.title=$('rt').value.trim();o.slug=$('rs').value.trim();o.cat=$('rc').value;o.date=$('rd').value.trim();o.desc=$('rx').value.trim();o.seo.title=$('rst').value.trim();o.seo.desc=$('rsd').value.trim();o.seo.kw=$('rk').value.trim();o.tag=$('rg').value.trim();o.author=$('ra').value.trim();try{localStorage.setItem('SR_IMP_AUTH',o.author)}catch(e){}}
   $('pvb').onclick=function(){grab();var h='';try{h=R.postHtml(S,Object.assign(clone(o),{slug:o.slug||'x'}))}catch(e){h='<p>'+esc(e.message)+'</p>'}$('pvw').innerHTML='<iframe class="pv" sandbox="allow-scripts"></iframe>';$('pvw').firstChild.srcdoc=h.replace(/<head[^>]*>/i,function(m){return m+'<base href="'+location.origin+'/" target="_blank"><script>document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a");if(!a)return;var h=a.getAttribute("href")||"";if(h.charAt(0)==="#"){e.preventDefault();var t=document.getElementById(decodeURIComponent(h.slice(1)));if(t)t.scrollIntoView({behavior:"smooth"})}})<\/script>'})};
+  drawEditor();
+  $('rtb').onclick=async function(){grab();this.disabled=true;var m=await retryImages(o);c.warn=c.warn.filter(function(x){return x.indexOf('تصویر منتقل نشد')<0}).concat(m.map(function(x){return'تصویر منتقل نشد و آدرس قدیم ماند: '+x}));stepReview()};
   $('cmb').onclick=function(){var w=$('cmw');if(w.innerHTML){w.innerHTML='';return}var nz=function(bl){return blocksText(bl.map(function(b){return b.t==='image'?{t:'image',src:'',alt:b.alt||'',caption:b.caption||''}:b}))};w.innerHTML=diffHtml(nz(c.conv.blocks),nz(o.blocks))};
   $('skb').onclick=function(){ST.skipped++;ST.qi++;stepDecide()};
   $('bkb').onclick=stepDecide;
@@ -404,6 +410,42 @@ async function publishOne(o,p){
   DONE[p.id]=href;W('SR_IMP_DONE',DONE);
   ST.redirects.push({from:p.link,to:href});
   log('✓ منتشر شد: '+href);
+}
+var BN={paragraph:'پاراگراف',heading:'عنوان',image:'تصویر',list:'فهرست',highlight:'کادر نکته',button:'دکمه',video:'یوتیوب',aparat:'آپارات',soundcloud:'ساندکلاد',audio:'صوت',embed:'کد',divider:'جداکننده'};
+function drawEditor(){
+  var o=ST.cur.o,box=$('bed');if(!box)return;box.innerHTML='';
+  o.blocks.forEach(function(b,i){
+    var d=document.createElement('div');d.className='box2';d.style.padding='8px';
+    var h='<div class="row" style="justify-content:space-between"><span class="tag">'+(BN[b.t]||b.t)+' '+(i+1)+'</span><span><button class="b" data-a="up">▲</button><button class="b" data-a="dn">▼</button><button class="b d" data-a="x">✕</button></span></div>';
+    function inp(k,lb,ltr,area){return'<label class="f"><span>'+lb+'</span>'+(area?'<textarea data-k="'+k+'" style="min-height:'+(k==='code'?120:Math.min(260,60+Math.floor((b[k]||'').length/2.2))) +'px">'+esc(b[k]||'')+'</textarea>':'<input data-k="'+k+'" class="'+(ltr?'ltr':'')+'" value="'+esc(b[k]||'')+'">')+'</label>'}
+    if(b.t==='heading')h+='<label class="f"><span>سطح عنوان</span><select data-k="level">'+[2,3,4,5,6].map(function(n){return'<option value="'+n+'"'+(+b.level===n?' selected':'')+'>H'+n+(n===2?' — بخش اصلی':n===3?' — زیربخش':'')+'</option>'}).join('')+'</select></label>'+inp('text','متن عنوان');
+    else if(b.t==='paragraph'||b.t==='list')h+=inp('text',b.t==='list'?'هر خط یک مورد':'متن',false,true);
+    else if(b.t==='highlight')h+=inp('label','عنوان کادر')+inp('text','متن',false,true);
+    else if(b.t==='image')h+=inp('src','آدرس تصویر',true)+inp('alt','توضیح تصویر (alt)')+inp('caption','زیرنویس');
+    else if(b.t==='button')h+=inp('label','متن دکمه')+inp('href','لینک',true);
+    else if(b.t==='video'||b.t==='aparat'||b.t==='soundcloud')h+=inp('url','لینک',true);
+    else if(b.t==='audio')h+=inp('src','آدرس فایل',true)+inp('title','عنوان');
+    else if(b.t==='embed')h+=inp('code','کد',true,true);
+    d.innerHTML=h;
+    d.oninput=function(e){var k=e.target.dataset.k;if(k)b[k]=e.target.value};
+    d.onchange=function(e){if(e.target.dataset.k==='level')b.level=+e.target.value};
+    d.onclick=function(e){var a=e.target.dataset.a;if(!a)return;
+      if(a==='x'){if(!confirm('این بلوک حذف شود؟'))return;o.blocks.splice(i,1)}
+      if(a==='up'&&i>0){var t=o.blocks[i];o.blocks[i]=o.blocks[i-1];o.blocks[i-1]=t}
+      if(a==='dn'&&i<o.blocks.length-1){var t2=o.blocks[i];o.blocks[i]=o.blocks[i+1];o.blocks[i+1]=t2}
+      drawEditor()};
+    box.appendChild(d);
+  });
+}
+async function retryImages(o){
+  var g=GH(),cache={},n=1,fail=0,msgs=[];
+  var list=o.blocks.filter(function(b){return b.t==='image'&&b.src&&b.src.charAt(0)!=='/'});
+  var cover=o.img&&o.img.charAt(0)!=='/';if(cover)list.unshift({cover:true,src:o.img});
+  var used=o.blocks.filter(function(b){return/^\/assets\/img\//.test(b.src||'')}).length+1;n=used+1;
+  for(var i=0;i<list.length;i++){log('تصویر '+(i+1)+' از '+list.length+'...');
+    try{var nu=await moveImage(g,list[i].src,o.slug,n++,cache);if(list[i].cover)o.img=nu;else list[i].src=nu}catch(e){fail++;msgs.push(list[i].src.slice(0,90)+' ← '+e.message)}}
+  log(list.length?((list.length-fail)+' تصویر منتقل شد'+(fail?'، '+fail+' تا نشد':'')):'تصویری برای تلاش دوباره نبود.');
+  return msgs;
 }
 function diffHtml(a,b){
   var A=a.split(/(\s+)/).filter(function(x){return x&&!/^\s+$/.test(x)}),B=b.split(/(\s+)/).filter(function(x){return x&&!/^\s+$/.test(x)});
