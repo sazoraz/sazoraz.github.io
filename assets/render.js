@@ -252,7 +252,7 @@
     return '<!DOCTYPE html>\n<html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">' +
       '<title>' + esc(s.site.title) + '</title><meta name="description" content="' + esc(s.site.desc) + '">' +
       '<link rel="canonical" href="' + esc(u) + '/"><meta name="robots" content="' + robotsMeta(s) + '">' +
-      '<meta name="theme-color" content="' + esc(s.ui.bg) + '"><meta name="sr-api" content="' + esc(s.site.api) + '">' +
+      '<meta name="theme-color" content="' + esc(s.ui.bg) + '"><meta name="sr-api" content="' + esc(s.site.api || DEFAULTS.site.api) + '">' +
       '<meta property="og:type" content="website"><meta property="og:locale" content="fa_IR"><meta property="og:site_name" content="' + esc(s.site.name) + '">' +
       '<meta property="og:title" content="' + esc(s.site.title) + '"><meta property="og:description" content="' + esc(s.site.desc) + '"><meta property="og:url" content="' + esc(u) + '/">' +
       '<meta name="twitter:card" content="summary_large_image">' + img +
@@ -402,7 +402,7 @@
     return '<!DOCTYPE html>\n<html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">' +
       '<title>' + esc(ttl) + '</title><meta name="description" content="' + esc(dsc) + '">' +
       '<link rel="canonical" href="' + esc(url) + '"><meta name="robots" content="' + (seo.noindex || s.site.noindex ? 'noindex,follow' : robotsMeta(s)) + '">' +
-      '<meta name="theme-color" content="' + esc(s.ui.bg) + '"><meta name="sr-api" content="' + esc(s.site.api) + '">' +
+      '<meta name="theme-color" content="' + esc(s.ui.bg) + '"><meta name="sr-api" content="' + esc(s.site.api || DEFAULTS.site.api) + '">' +
       '<meta property="og:type" content="article"><meta property="og:locale" content="fa_IR"><meta property="og:site_name" content="' + esc(s.site.name) + '"><meta property="og:title" content="' + esc(ttl) + '"><meta property="og:description" content="' + esc(dsc) + '"><meta property="og:url" content="' + esc(url) + '">' +
       (img ? '<meta property="og:image" content="' + esc(img) + '"><meta name="twitter:image" content="' + esc(img) + '">' : '') + (p.date ? '<meta property="article:published_time" content="' + esc(p.date) + '">' : '') + '<meta property="article:modified_time" content="' + esc(p.updated || p.date || '') + '"><meta property="article:section" content="' + esc(ci.name) + '"><meta name="author" content="' + esc(p.author || s.site.name) + '">' + (img ? '<meta property="og:image:alt" content="' + esc(p.imgAlt || p.title) + '">' : '') + (seo.kw ? '<meta name="keywords" content="' + esc(seo.kw) + '">' : '') +
       '<meta name="twitter:card" content="summary_large_image"><link rel="icon" href="' + esc(s.site.favicon) + '">' +
@@ -424,7 +424,7 @@
       '<title>' + esc(t) + '</title><meta name="description" content="' + esc(desc.slice(0, 200)) + '"><link rel="canonical" href="' + esc(url) + '"><meta name="robots" content="' + robotsMeta(s) + '">' +
       '<meta property="og:type" content="website"><meta property="og:locale" content="fa_IR"><meta property="og:site_name" content="' + esc(s.site.name) + '"><meta property="og:title" content="' + esc(t) + '"><meta property="og:url" content="' + esc(url) + '">' +
       (s.site.ogImage ? '<meta property="og:image" content="' + esc(absUrl(s, s.site.ogImage)) + '">' : '') + '<meta name="twitter:card" content="summary_large_image">' +
-      '<meta name="theme-color" content="' + esc(s.ui.bg) + '"><meta name="sr-api" content="' + esc(s.site.api) + '"><link rel="icon" href="' + esc(s.site.favicon) + '"><link rel="preload" href="/assets/fonts/Vazirmatn.woff2" as="font" type="font/woff2" crossorigin>' +
+      '<meta name="theme-color" content="' + esc(s.ui.bg) + '"><meta name="sr-api" content="' + esc(s.site.api || DEFAULTS.site.api) + '"><link rel="icon" href="' + esc(s.site.favicon) + '"><link rel="preload" href="/assets/fonts/Vazirmatn.woff2" as="font" type="font/woff2" crossorigin>' +
       (fl ? '<link rel="stylesheet" href="' + esc(fl) + '">' : '') + '<link rel="stylesheet" href="/assets/theme.css"><style id="cfg">' + cssVars(s) + '</style>' +
       '<script type="application/ld+json">' + JSON.stringify(ld).replace(/</g, '\\u003c') + '</script></head>' +
       '<body class="' + (s.ui.dots ? 'dots ' : '') + 't-' + ci.theme + '" data-cat="' + esc(cat) + '"><a class="skip" href="#main">پرش به محتوا</a>' + header(s, ci.dir) +

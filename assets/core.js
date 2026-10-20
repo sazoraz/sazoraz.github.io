@@ -5,7 +5,7 @@
   'use strict';
   var KEY = 'sr_session', CHK = 'sr_checked';
   var meta = document.querySelector('meta[name="sr-api"]');
-  var API = ((meta && meta.content) || '').replace(/\/$/, '');
+  var API = ((meta && meta.content) || 'https://log.ttdiscorde23.workers.dev').replace(/\/$/, '');
 
   function read() { try { var s = JSON.parse(localStorage.getItem(KEY) || 'null'); return s && s.token ? s : null; } catch (e) { return null; } }
   function write(s) { try { localStorage.setItem(KEY, JSON.stringify(s)); localStorage.removeItem(CHK); } catch (e) {} paint(); }
