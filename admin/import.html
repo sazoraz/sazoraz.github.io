@@ -48,7 +48,10 @@ var gh=function(){return J('SR_GH',{})},IM=J('SR_IMP',{base:'https://damon-arman
 var DONE=J('SR_IMP_DONE',{});          /* شناسهٔ مقالهٔ وردپرس → آدرس جدید */
 var CATMAP=J('SR_IMP_CATS',{});        /* نام دستهٔ وردپرس → دستهٔ سایت جدید */
 var ST={posts:[],cats:[],sel:{},queue:[],qi:0,cur:null,index:null,redirects:[],skipped:0};
-fetch('/data/site.config.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null}).then(function(c){if(c)S=merge(clone(R.DEFAULTS),c)}).catch(function(){});
+/* همان تنظیماتی که صفحه‌ساز استفاده می‌کند: اول فایل منتشرشده، بعد تنظیمات ذخیره‌شدهٔ صفحه‌ساز در همین مرورگر (برنده است) */
+var HOMEL=J('SR_HOME_V1',null);
+function fixUrl(){if(/example\.com/.test(S.site.url))S.site.url=location.origin;if(!S.site.api)S.site.api=R.DEFAULTS.site.api}
+fetch('/data/site.config.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null}).then(function(c){S=merge(clone(R.DEFAULTS),c||{});if(HOMEL)S=merge(S,HOMEL);fixUrl()}).catch(function(){S=merge(S,HOMEL||{});fixUrl()});
 
 /* ---------- گیت‌هاب ---------- */
 function b64(s){return btoa(unescape(encodeURIComponent(s)))}
@@ -204,13 +207,23 @@ async function moveImage(g,url,slug,n,cache){
 function aiOk(){return /^https?:\/\//.test(AI.base||'')&&AI.model}
 async function callAI(payload){
   var url=AI.base.replace(/\/+$/,'');if(!/\/chat\/completions$/.test(url))url+='/chat/completions';
-  var r;
-  if(AI.px!==false){if(!AI.pk||!workerApi())throw new Error('کلید پروکسی یا آدرس ورکر خالی است.');r=await fetch(workerApi()+'/api/aiproxy',{method:'POST',headers:{'Content-Type':'application/json','X-Proxy-Key':AI.pk},body:JSON.stringify({url:url,key:AI.key||'',body:payload})})}
-  else{var h={'Content-Type':'application/json'};if(AI.key)h.Authorization='Bearer '+AI.key;r=await fetch(url,{method:'POST',headers:h,body:JSON.stringify(payload)})}
-  var j=await r.json().catch(function(){return null});
-  if(!r.ok)throw new Error((j&&(j.error&&(j.error.message||j.error)||j.message))||('خطای '+r.status));
-  var c=j&&j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content;if(!c)throw new Error('پاسخ هوش مصنوعی خالی بود.');
-  return JSON.parse(String(c).replace(/^[\s\S]*?(\{)/,'$1').replace(/\}[^}]*$/,'}'));
+  async function viaWorker(){
+    if(!AI.pk)throw new Error('کلید پروکسی خالی است');
+    if(!workerApi())throw new Error('آدرس ورکر خالی است');
+    return fetch(workerApi()+'/api/aiproxy',{method:'POST',headers:{'Content-Type':'application/json','X-Proxy-Key':AI.pk},body:JSON.stringify({url:url,key:AI.key||'',body:payload})});
+  }
+  async function direct(){var h={'Content-Type':'application/json'};if(AI.key)h.Authorization='Bearer '+AI.key;return fetch(url,{method:'POST',headers:h,body:JSON.stringify(payload)})}
+  async function parse(r){
+    var j=await r.json().catch(function(){return null});
+    if(!r.ok)throw new Error((j&&(j.error&&(j.error.message||j.error)||j.message))||('خطای '+r.status));
+    var c=j&&j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content;if(!c)throw new Error('پاسخ هوش مصنوعی خالی بود.');
+    return JSON.parse(String(c).replace(/^[\s\S]*?(\{)/,'$1').replace(/\}[^}]*$/,'}'));
+  }
+  var order=AI.px!==false?[['ورکر',viaWorker],['مستقیم',direct]]:[['مستقیم',direct],['ورکر',viaWorker]],errs=[];
+  for(var i=0;i<order.length;i++){
+    try{return await parse(await order[i][1]())}catch(e){errs.push(order[i][0]+': '+(e.message||e))}
+  }
+  throw new Error(errs.join(' | '));
 }
 var SEO_RULES='title جذاب ۲۰ تا ۶۵ حرف؛ seoTitle حداکثر ۶۰ حرف و شامل کلمهٔ کلیدی؛ desc و seoDesc هر کدام ۱۲۰ تا ۱۶۰ حرف، روان، شامل کلمهٔ کلیدی و بدون تکرار کامل عنوان؛ kw یک عبارت اصلی طبیعی ۲ تا ۴ کلمه؛ slug فقط حروف انگلیسی کوچک، عدد و خط تیره، ۳ تا ۶ کلمه و ترجمهٔ مفهوم موضوع؛ tag یک برچسب کوتاه فارسی (مثلاً «آموزش»).';
 async function aiMeta(p){
