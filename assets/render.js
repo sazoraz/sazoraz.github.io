@@ -319,7 +319,7 @@
   function blockHtml(b, i, all) {
     switch (b.t) {
       case 'paragraph': return (b.text || '').split(/\n{2,}/).filter(function (x) { return x.trim(); }).map(function (x) { return '<p>' + inline(x.trim()) + '</p>'; }).join('');
-      case 'heading': var l = b.level === 3 ? 3 : 2; return '<h' + l + ' id="h' + i + '">' + esc(b.text) + '</h' + l + '>';
+      case 'heading': var l = Math.max(2, Math.min(6, parseInt(b.level, 10) || 2)); return '<h' + l + ' id="h' + i + '">' + esc(b.text) + '</h' + l + '>';
       case 'image': return b.src ? '<figure class="fig"><img src="' + esc(href(b.src)) + '" alt="' + esc(b.alt || b.caption || '') + '" loading="lazy" decoding="async">' + (b.caption ? '<figcaption>' + esc(b.caption) + '</figcaption>' : '') + '</figure>' : '';
       case 'video': var id = ytId(b.url); return id ? '<div class="vid"><iframe src="https://www.youtube-nocookie.com/embed/' + id + '" title="' + esc(b.title || 'ویدیو') + '" loading="lazy" allow="accelerometer; encrypted-media; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>' : '';
       case 'soundcloud': return /^https:\/\/soundcloud\.com\//.test(b.url || '') ? '<div class="sc"><iframe src="https://w.soundcloud.com/player/?url=' + encodeURIComponent(b.url) + '&color=%23ff9770&hide_related=true&show_comments=false" title="' + esc(b.title || 'SoundCloud') + '" loading="lazy"></iframe></div>' : '';
@@ -373,10 +373,10 @@
         } else bodyHtml += gateBox(b);
         i += n; continue;
       }
-      if (b.t === 'heading' && b.text) heads.push({ id: 'h' + i, text: b.text, l: b.level === 3 ? 3 : 2 });
+      if (b.t === 'heading' && b.text) heads.push({ id: 'h' + i, text: b.text, l: Math.max(2, Math.min(6, parseInt(b.level, 10) || 2)) });
       bodyHtml += renderOne(b, i, all, tg);
     }
-    var toc = heads.length >= 3 ? '<nav class="toc" aria-label="فهرست مطالب"><b>فهرست مطالب</b><ol>' + heads.map(function (h) { return '<li' + (h.l === 3 ? ' style="margin-right:16px;opacity:.85"' : '') + '><a href="#' + h.id + '">' + esc(h.text) + '</a></li>'; }).join('') + '</ol></nav>' : '';
+    var toc = heads.length >= 3 ? '<nav class="toc" aria-label="فهرست مطالب"><b>فهرست مطالب</b><ol>' + heads.map(function (h) { return '<li' + (h.l > 2 ? ' style="margin-right:' + ((h.l - 2) * 16) + 'px;opacity:.85"' : '') + '><a href="#' + h.id + '">' + esc(h.text) + '</a></li>'; }).join('') + '</ol></nav>' : '';
     var meta = [faDate(p.date), readMin(p), p.author].filter(Boolean).map(function (x) { return '<span>' + esc(x) + '</span>'; }).join('');
     var rel = (p.related || []).filter(function (r) { return r.title && r.href; });
     return '<div class="art-wrap t-' + ci.theme + '"><article class="art">' +

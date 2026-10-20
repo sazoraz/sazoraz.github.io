@@ -429,3 +429,6 @@ body.pn-on{overflow-x:clip}
 /* v9: بنرها زیر هم */
 .pn-bn,.pn-bn.multi{display:grid;overflow:visible;gap:14px;padding:0}
 .pn-bn.multi .pn-bn-i{flex:none;width:auto}
+
+/* v12: عنوان‌های H4 تا H6 */
+.prose h4{font-size:18px;margin-top:22px;scroll-margin-top:90px}.prose h5{font-size:16px;margin-top:20px;color:var(--tc);scroll-margin-top:90px}.prose h6{font-size:15px;margin-top:18px;opacity:.9;scroll-margin-top:90px}
