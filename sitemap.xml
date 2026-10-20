@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-<url><loc>https://example.com/</loc></url>
-<url><loc>https://example.com/shop/</loc></url>
-<url><loc>https://example.com/tuner/</loc></url>
-<url><loc>https://example.com/compose/</loc></url>
-<url><loc>https://example.com/mixing/</loc></url>
-<url><loc>https://example.com/chords/</loc></url>
-<url><loc>https://example.com/sheets/</loc></url>
-<url><loc>https://example.com/compose/lumina-project-sam-kontakt-library/</loc><lastmod>2013-06-14</lastmod></url>
-<url><loc>https://example.com/compose/focusrite-scarlett-18i20-audio-interface/</loc><lastmod>2013-06-14</lastmod></url>
+<url><loc>https://sazoraz.github.io/</loc></url>
+<url><loc>https://sazoraz.github.io/shop/</loc></url>
+<url><loc>https://sazoraz.github.io/tuner/</loc></url>
+<url><loc>https://sazoraz.github.io/compose/</loc></url>
+<url><loc>https://sazoraz.github.io/mixing/</loc></url>
+<url><loc>https://sazoraz.github.io/chords/</loc></url>
+<url><loc>https://sazoraz.github.io/sheets/</loc></url>
+<url><loc>https://sazoraz.github.io/compose/lumina-project-sam-kontakt-library/</loc><lastmod>2013-06-14</lastmod></url>
+<url><loc>https://sazoraz.github.io/compose/focusrite-scarlett-18i20-audio-interface/</loc><lastmod>2013-06-14</lastmod></url>
 </urlset>
