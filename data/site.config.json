@@ -8,10 +8,10 @@
     "desc": "مرجع فارسی آهنگسازی و تنظیم، میکس و مسترینگ، آکوردهای مدرن و نت‌های پیانو و گیتار با دانلود رایگان.",
     "ogImage": "",
     "favicon": "/assets/favicon.svg",
-    "api": "https://log.ttdiscorde23.workers.dev"
+    "api": ""
   },
   "fonts": {
-    "heading": "Lalezar",
+    "heading": "Vazirmatn",
     "body": "Vazirmatn",
     "customCss": ""
   },
@@ -34,7 +34,7 @@
   },
   "menu": [
     {
-      "label": "آهنگسازی",
+      "label": "آهنگسازی و تنظیم",
       "href": "/compose/",
       "theme": "compose"
     },
@@ -83,7 +83,7 @@
       "viewAll": "مشاهده همه",
       "href": "/compose/",
       "auto": "compose",
-      "short": "آهنگسازی",
+      "short": "آهنگسازی و تنظیم",
       "shortSub": "پروژه‌های باز",
       "cards": [
         {
@@ -125,7 +125,7 @@
       "viewAll": "کتابخانه ترفندها",
       "href": "/mixing/",
       "auto": "mixing",
-      "short": "میکس و مستر",
+      "short": "میکس و مسترینگ",
       "shortSub": "زنجیره پلاگین‌ها",
       "cards": [
         {
@@ -292,7 +292,7 @@
         "title": "بخش‌ها",
         "links": [
           {
-            "label": "آهنگسازی",
+            "label": "آهنگسازی و تنظیم",
             "href": "/compose/"
           },
           {
