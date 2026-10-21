@@ -41,7 +41,7 @@
     themes: { compose: '#ffd166', mix: '#70d6bc', chords: '#9d8df1', sheets: '#ff70a6', extra: '#ff9770' },
     ui: { bg: '#0e1118', card: '#1b202c', text: '#f4f3f7', muted: '#a9b0c0', radius: 16, shadow: 5, shadowColor: '#000000', dots: true },
     menu: [
-      { label: 'آهنگسازی', href: '/compose/', theme: 'compose' },
+      { label: 'آهنگسازی و تنظیم', href: '/compose/', theme: 'compose' },
       { label: 'میکس و مسترینگ', href: '/mixing/', theme: 'mix' },
       { label: 'آکوردها', href: '/chords/', theme: 'chords' },
       { label: 'نت‌ها', href: '/sheets/', theme: 'sheets' },
@@ -57,7 +57,7 @@
     sections: [
       {
         id: 'compose', theme: 'compose', icon: 'headphones', title: 'آهنگسازی، تنظیم و ریتم‌سازی', badge: 'DAW Lab',
-        sub: 'پروژه‌های قابل ویرایش و دوره‌های تخصصی ریتم', viewAll: 'مشاهده همه', href: '/compose/', auto: 'compose', short: 'آهنگسازی', shortSub: 'پروژه‌های باز',
+        sub: 'پروژه‌های قابل ویرایش و دوره‌های تخصصی ریتم', viewAll: 'مشاهده همه', href: '/compose/', auto: 'compose', short: 'آهنگسازی و تنظیم', shortSub: 'پروژه‌های باز',
         cards: [
           { title: 'اصول چیدمان ریتم درامز در سبک ترپ و هیپ‌هاپ مدرن', desc: 'بررسی توزیع فرکانسی های‌هت و کیک ۸۰۸ به همراه فایل لایه‌باز پروژه.', tag: 'پروژه ابلتون', meta: '۶ دقیقه مطالعه', cta: 'دانلود پروژه', href: '#', img: '' },
           { title: 'تکنیک‌های تنظیم هارمونی پیانو در پاپ ایرانی', desc: 'وویسینگ کروماتیک و پیوندهای خط باس در قطعات ماندگار معاصر.', tag: 'مسترکلاس ویدیویی', meta: '۱۴ دقیقه', cta: 'شروع آموزش', href: '#', img: '' },
@@ -66,7 +66,7 @@
       },
       {
         id: 'mixing', theme: 'mix', icon: 'eq', title: 'میکس و مسترینگ', badge: 'Sound Eng',
-        sub: 'مهندسی صدا، اکولایزر و کمپرسور', viewAll: 'کتابخانه ترفندها', href: '/mixing/', auto: 'mixing', short: 'میکس و مستر', shortSub: 'زنجیره پلاگین‌ها',
+        sub: 'مهندسی صدا، اکولایزر و کمپرسور', viewAll: 'کتابخانه ترفندها', href: '/mixing/', auto: 'mixing', short: 'میکس و مسترینگ', shortSub: 'زنجیره پلاگین‌ها',
         cards: [
           { title: 'کنترل فرکانس‌های بم با کمپرسور چندبانده', desc: 'حل تداخل ساب‌بیس و کیک با داکینگ داینامیک.', tag: 'کمپرسور چندبانده', meta: '۲۰ تا ۲۵۰ هرتز', cta: 'مشاهده ترفند', href: '#', img: '' },
           { title: 'راز شفافیت و درخشش (Air) وکال در میکس نهایی', desc: 'اکولایزر و سچوریشن نواری برای زنده‌تر شدن صدای خواننده.', tag: 'ترفند وکال', meta: '', cta: 'شنیدن نمونه', href: '#', img: '' },
@@ -111,7 +111,7 @@
         { theme: 'sheets', label: 'آپدیت مسترکلاس', title: 'فصل چهارم: اسرار سایدچین', text: 'آنالیز پروژه واقعی با پرکاشن سنتی و درام‌کیت.', foot: '۹ قسمت جدید', href: '#' }
       ],
       cols: [
-        { title: 'بخش‌ها', links: [{ label: 'آهنگسازی', href: '/compose/' }, { label: 'میکس و مسترینگ', href: '/mixing/' }, { label: 'آکوردها', href: '/chords/' }, { label: 'نت‌ها', href: '/sheets/' }] },
+        { title: 'بخش‌ها', links: [{ label: 'آهنگسازی و تنظیم', href: '/compose/' }, { label: 'میکس و مسترینگ', href: '/mixing/' }, { label: 'آکوردها', href: '/chords/' }, { label: 'نت‌ها', href: '/sheets/' }] },
         { title: 'حساب کاربری', links: [{ label: 'ورود / ثبت‌نام', href: '/account/' }, { label: 'پنل کاربری', href: '/account/panel/' }, { label: 'فروشگاه', href: '/shop/' }] },
         { title: 'پشتیبانی', links: [{ label: 'تماس با ما', href: '/contact/' }, { label: 'قوانین', href: '/terms/' }, { label: 'حریم خصوصی', href: '/privacy/' }] }
       ]

@@ -51,13 +51,16 @@
     if (!(window.SR && SR.session())) {
       var a = el('a', 'btn', 'برای ثبت نظر وارد شوید'); a.href = '/account/?next=' + encodeURIComponent(location.pathname + '#comments'); form.appendChild(a); return;
     }
-    var f = el('form', 'fm'); f.innerHTML = '<label>نظر شما<textarea name="text" rows="3" maxlength="1000" required></textarea></label><div class="note-msg" role="status" aria-live="polite"></div><button class="btn" type="submit">ارسال نظر</button><small>نظر شما پس از تأیید مدیر نمایش داده می‌شود.</small>';
-    var m = f.querySelector('.note-msg'), btn = f.querySelector('button');
+    var f = el('form', 'fm'); f.innerHTML = '<label>نام شما<input name="name" type="text" maxlength="40" required autocomplete="name"></label><label>آدرس ایمیل (نمایش داده نمی‌شود)<input name="email" type="email" maxlength="100" required autocomplete="email" dir="ltr"></label><label>نظر شما<textarea name="text" rows="3" maxlength="1000" required></textarea></label><div class="note-msg" role="status" aria-live="polite"></div><button class="btn" type="submit">ارسال نظر</button><small>نظر شما پس از تأیید مدیر نمایش داده می‌شود.</small>';
+    var m = f.querySelector('.note-msg'), btn = f.querySelector('button'), ses0 = SR.session();
+    var sv = {}; try { sv = JSON.parse(localStorage.getItem('sr_cm') || '{}'); } catch (e) {}
+    f.elements.name.value = sv.name || (ses0 && ses0.name) || ''; f.elements.email.value = sv.email || '';
     f.addEventListener('submit', function (e) {
       e.preventDefault(); btn.disabled = true; m.className = 'note-msg';
-      SR.fetch('/api/comments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ post: post, text: f.elements.text.value }) })
+      try { localStorage.setItem('sr_cm', JSON.stringify({ name: f.elements.name.value.trim(), email: f.elements.email.value.trim() })); } catch (e2) {}
+      SR.fetch('/api/comments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ post: post, text: f.elements.text.value, name: f.elements.name.value.trim(), email: f.elements.email.value.trim() }) })
         .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { if (r.status === 401) { SR.logout(); draw(); throw new Error('نشست شما منقضی شده؛ دوباره وارد شوید.'); } if (!r.ok) throw new Error(d.error || 'ارسال ناموفق بود.'); return d; }); })
-        .then(function () { f.reset(); m.textContent = 'نظر شما ثبت شد و پس از تأیید نمایش داده می‌شود.'; m.className = 'note-msg show ok'; }, function (er) { m.textContent = er.message || 'ارتباط با سرور برقرار نشد.'; m.className = 'note-msg show err'; })
+        .then(function () { f.elements.text.value = ''; m.textContent = 'نظر شما ثبت شد و پس از تأیید نمایش داده می‌شود.'; m.className = 'note-msg show ok'; }, function (er) { m.textContent = er.message || 'ارتباط با سرور برقرار نشد.'; m.className = 'note-msg show err'; })
         .then(function () { btn.disabled = false; });
     });
     form.appendChild(f);
