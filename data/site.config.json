@@ -8,10 +8,10 @@
     "desc": "مرجع فارسی آهنگسازی و تنظیم، میکس و مسترینگ، آکوردهای مدرن و نت‌های پیانو و گیتار با دانلود رایگان.",
     "ogImage": "",
     "favicon": "/assets/favicon.svg",
-    "api": ""
+    "api": "https://log.ttdiscorde23.workers.dev"
   },
   "fonts": {
-    "heading": "Vazirmatn",
+    "heading": "Lalezar",
     "body": "Vazirmatn",
     "customCss": ""
   },
