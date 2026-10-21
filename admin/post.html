@@ -320,10 +320,11 @@ async function rebuildListings(g,posts,cats){
   for(var i=0;i<cats.length;i++){var ci=R.catInfo(S,cats[i]);await putF(g,ci.dir.slice(1)+'index.html',b64(R.archivePage(S,cats[i],posts)),'archive '+cats[i]);log('✓ صفحهٔ دستهٔ '+ci.name,true)}
   await putF(g,'index.html',b64(R.page(S,posts)),'home');log('✓ صفحهٔ اصلی',true);
 }
+async function freshCfg(g){var f=await getF(g,'data/site.config.json');if(!f)throw new Error('data/site.config.json در گیت‌هاب پیدا نشد.');S=merge(clone(R.DEFAULTS),JSON.parse(ub64(f.content)));fixUrl();log('تنظیمات از گیت‌هاب خوانده شد — فونت عنوان: '+S.fonts.heading+' | متن: '+S.fonts.body,true)}
 async function republishAll(){
   try{
     var g=g0();if(!confirm('همهٔ پست‌ها، صفحه‌های دسته و صفحهٔ اصلی دوباره ساخته شوند؟ (چند دقیقه طول می‌کشد)'))return;
-    var posts=await readPosts(g),n=0;log('در حال بازسازی '+posts.length+' پست...');
+    await freshCfg(g);var posts=await readPosts(g),n=0;log('در حال بازسازی '+posts.length+' پست...');
     for(var i=0;i<posts.length;i++){
       var slug=posts[i].href.split('/').filter(Boolean).pop(),f=await getF(g,'data/posts/'+slug+'.json');
       if(!f){log('⚠ منبع پیدا نشد: '+slug,true);continue}
@@ -339,7 +340,7 @@ async function republishAll(){
 }
 async function publish(){
   try{
-    var g=g0(),o=out();
+    var g=g0(),o=out();await freshCfg(g);
     if(!/^[a-z0-9-]{3,80}$/.test(o.slug))throw new Error('نشانی کوتاه باید ۳ تا ۸۰ حرف انگلیسی کوچک، عدد یا - باشد.');
     if(!o.title.trim())throw new Error('عنوان پست خالی است.');
     if(!o.date)o.date=today();o.updated=today();P.date=o.date;P.updated=o.updated;save();
@@ -358,7 +359,7 @@ async function publish(){
 }
 async function unpublish(){
   try{
-    var g=g0(),o=out();if(!confirm('این پست از سایت حذف شود؟'))return;
+    var g=g0(),o=out();if(!confirm('این پست از سایت حذف شود؟'))return;await freshCfg(g);
     var ci=R.catInfo(S,o.cat),href=ci.dir+o.slug+'/';log('در حال حذف...');
     await delF(g,ci.dir.slice(1)+o.slug+'/index.html');await delF(g,'data/posts/'+o.slug+'.json');try{await gatePut(o.slug,[])}catch(e){log('⚠ '+e.message,true)}
     var posts=(await readPosts(g)).filter(function(p){return p.href!==href});await writePosts(g,posts);

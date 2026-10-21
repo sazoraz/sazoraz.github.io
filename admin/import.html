@@ -51,7 +51,7 @@ var ST={posts:[],cats:[],sel:{},queue:[],qi:0,cur:null,index:null,redirects:[],s
 /* همان تنظیماتی که صفحه‌ساز استفاده می‌کند: اول فایل منتشرشده، بعد تنظیمات ذخیره‌شدهٔ صفحه‌ساز در همین مرورگر (برنده است) */
 var HOMEL=J('SR_HOME_V1',null);
 function fixUrl(){if(/example\.com/.test(S.site.url))S.site.url=location.origin;if(!S.site.api)S.site.api=R.DEFAULTS.site.api}
-fetch('/data/site.config.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null}).then(function(c){S=merge(clone(R.DEFAULTS),c||{});if(HOMEL)S=merge(S,HOMEL);fixUrl()}).catch(function(){S=merge(S,HOMEL||{});fixUrl()});
+fetch('/data/site.config.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null}).then(function(c){S=merge(clone(R.DEFAULTS),c||{});fixUrl()}).catch(function(){S=merge(S,HOMEL||{});fixUrl()});
 
 /* ---------- گیت‌هاب ---------- */
 function b64(s){return btoa(unescape(encodeURIComponent(s)))}
@@ -412,7 +412,7 @@ function stepReview(){
   };
 }
 async function publishOne(o,p){
-  var g=GH(),ci=R.catInfo(S,o.cat),href=ci.dir+o.slug+'/',base=ci.dir.slice(1)+o.slug;
+  var g=GH();if(!ST._cfg){await freshCfg(g);ST._cfg=1}var ci=R.catInfo(S,o.cat),href=ci.dir+o.slug+'/',base=ci.dir.slice(1)+o.slug;
   if(!o.updated)o.updated=o.date;
   log('در حال انتشار...');
   await putF(g,base+'/index.html',b64(R.postHtml(S,o)),'import '+o.slug);
@@ -473,11 +473,12 @@ function diffHtml(a,b){
   return legend+(same?'<div class="note">متن تغییری نکرده است.</div>':'')+'<div class="box2" style="white-space:pre-wrap;line-height:2.1;max-height:420px;overflow:auto">'+o+'</div>';
 }
 function oldPath(link){try{var u=new URL(link);return safeDec(u.pathname)}catch(e){return''}}
+async function freshCfg(g){var f=await getF(g,'data/site.config.json');if(!f)throw new Error('data/site.config.json در گیت‌هاب پیدا نشد.');S=merge(clone(R.DEFAULTS),JSON.parse(ub64(f.content)));fixUrl();log('تنظیمات از گیت‌هاب خوانده شد — فونت عنوان: '+S.fonts.heading+' | متن: '+S.fonts.body,true)}
 async function finish(){
   app.onclick=null;app.onchange=null;
   app.innerHTML='<div class="box2"><b>در حال ساخت سایت‌مپ، فهرست‌ها و ریدایرکت‌ها...</b></div>';
   try{
-    var g=GH(),posts=await readIndex(g);ST.index=posts;
+    var g=GH();await freshCfg(g);var posts=await readIndex(g);ST.index=posts;
     await putF(g,'sitemap.xml',b64(pageList(posts)),'import: sitemap');log('✓ sitemap');
     var cats={};posts.forEach(function(x){cats[x.cat]=1});
     for(var c in cats){await putF(g,R.catInfo(S,c).dir.slice(1)+'index.html',b64(R.archivePage(S,c,posts)),'import: archive '+c);log('✓ صفحهٔ دسته '+c,true)}
