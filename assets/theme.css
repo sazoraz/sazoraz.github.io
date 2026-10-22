@@ -435,7 +435,7 @@ body.pn-on{overflow-x:clip}
 
 /* v17: دسکتاپ ۴ کارت، هیرو جمع‌وجور، جاستیفای نکته */
 .hl-box,.hl-box>div{text-align:justify;text-justify:inter-word}
-@media(min-width:1041px){
+@media(min-width:900px){
   .sec .grid:not(.v){grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
   .sec .grid:not(.v) .card{padding:12px;gap:10px}
   .sec .grid:not(.v) .card h3{font-size:14px;line-height:1.7}
