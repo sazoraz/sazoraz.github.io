@@ -186,8 +186,8 @@
       '<div class="card-b"><h3><a class="stretch" href="' + esc(/^(https?:)?\/|^#/.test(p.href || '') ? p.href : '#') + '">' + esc(p.title) + '</a></h3><p>' + esc(p.desc || '') + '</p></div><span class="cta">مشاهده' + ic('arrow') + '</span></article>';
   }
   function section(sec, posts) {
-    var ac = (sec.auto && posts) ? posts.filter(function (p) { return p.cat === sec.auto; }).sort(byDate).slice(0, 3) : [];
-    var cards = ac.length ? ac.map(function (p) { return pcard(p, sec); }).concat(sec.cards.slice(0, Math.max(0, 3 - ac.length)).map(function (c) { return card(c, sec); })) : sec.cards.map(function (c) { return card(c, sec); });
+    var ac = (sec.auto && posts) ? posts.filter(function (p) { return p.cat === sec.auto; }).sort(byDate).slice(0, 4) : [];
+    var cards = ac.length ? ac.map(function (p) { return pcard(p, sec); }).concat(sec.cards.slice(0, Math.max(0, 4 - ac.length)).map(function (c) { return card(c, sec); })) : sec.cards.map(function (c) { return card(c, sec); });
     return '<section class="sec t-' + esc(sec.theme) + '" id="' + esc(sec.id) + '" data-auto="' + esc(sec.auto || '') + '"' + (ac.length ? ' data-static="1"' : '') + ' data-theme-key="' + esc(sec.theme) + '" data-icon="' + esc(sec.icon) + '">' +
       '<div class="sec-h"><div class="sec-t"><span class="sec-i">' + ic(sec.icon) + '</span><div><h2>' + esc(sec.title) + (sec.badge ? '<span class="tag">' + esc(sec.badge) + '</span>' : '') + '</h2><p>' + esc(sec.sub) + '</p></div></div>' +
       '<a class="btn btn-w" href="' + esc(href(sec.href)) + '">' + esc(sec.viewAll) + ic('arrow') + '</a></div>' +
@@ -284,7 +284,8 @@
   function postUrl(s, p) { return s.site.url.replace(/\/$/, '') + catInfo(s, p.cat).dir + p.slug + '/'; }
   function absUrl(s, u) { return !u ? '' : /^https?:\/\//.test(u) ? u : s.site.url.replace(/\/$/, '') + (u.charAt(0) === '/' ? u : '/' + u); }
   function inline(t) {
-    return esc(t).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+|\/[^)\s]*)\)/g, '<a href="$2" rel="noopener">$1</a>').replace(/\n/g, '<br>');
+    t = String(t == null ? '' : t).replace(/<a\s+[^>]*?href\s*=\s*["']((?:https?:\/\/|\/|#)[^"'\s]*)["'][^>]*>([\s\S]*?)<\/a>/gi, function (m, u, x) { return '[' + x.replace(/<[^>]*>/g, '').replace(/[\[\]]/g, '') + '](' + u + ')'; });
+    return esc(t).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+|\/[^)\s]*|#[^)\s]*)\)/g, '<a href="$2" rel="noopener">$1</a>').replace(/\n/g, '<br>');
   }
   function ytId(u) {
     u = String(u || '').trim(); var m = /(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?(?:[^#]*&)?v=|embed\/|shorts\/))([A-Za-z0-9_-]{11})/.exec(u);

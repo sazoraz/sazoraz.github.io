@@ -432,3 +432,26 @@ body.pn-on{overflow-x:clip}
 
 /* v12: عنوان‌های H4 تا H6 */
 .prose h4{font-size:18px;margin-top:22px;scroll-margin-top:90px}.prose h5{font-size:16px;margin-top:20px;color:var(--tc);scroll-margin-top:90px}.prose h6{font-size:15px;margin-top:18px;opacity:.9;scroll-margin-top:90px}
+
+/* v17: دسکتاپ ۴ کارت، هیرو جمع‌وجور، جاستیفای نکته */
+.hl-box,.hl-box>div{text-align:justify;text-justify:inter-word}
+@media(min-width:1041px){
+  .sec .grid:not(.v){grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+  .sec .grid:not(.v) .card{padding:12px;gap:10px}
+  .sec .grid:not(.v) .card h3{font-size:14px;line-height:1.7}
+  .sec .grid:not(.v) .card p{font-size:12px;line-height:1.8}
+  .sec .grid:not(.v) .chip{font-size:10px;padding:1px 8px;top:8px;right:8px}
+  .sec .grid:not(.v) .cta,.sec .grid:not(.v) .card .btn{padding:7px 10px;font-size:13px}
+}
+@media(min-width:761px){
+  .hero{padding:20px 26px}
+  .hero-in{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:20px}
+  .hero h1{font-size:clamp(22px,2.7vw,32px);margin:8px 0}
+  .hero p{font-size:14px;line-height:1.8}
+  .deck{max-width:340px;margin-inline:auto;padding:10px}
+  .deck .eq{height:56px}
+  .sh.a{width:120px;height:120px}.sh.b{width:90px;height:90px}
+  .quick{margin-top:14px;padding-top:12px}
+}
+@media(min-width:761px) and (max-width:1040px){.hero-in{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}.deck{max-width:300px}}
+@media(max-width:700px){.sec .grid:not(.v) .card:nth-child(n+4){display:none}}

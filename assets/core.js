@@ -81,7 +81,7 @@
       if (!d || !d.posts) return;
       secs.forEach(function (sec) {
         var cat = sec.dataset.auto, icon = sec.dataset.icon;
-        var list = d.posts.filter(function (p) { return p.cat === cat; }).sort(function (a, b) { return String(b.date).localeCompare(String(a.date)); }).slice(0, 3);
+        var list = d.posts.filter(function (p) { return p.cat === cat; }).sort(function (a, b) { return String(b.date).localeCompare(String(a.date)); }).slice(0, 4);
         if (!list.length) return;
         var grid = sec.querySelector('.grid'), keep = grid.querySelectorAll('.card'), html = '';
         list.forEach(function (p) {
