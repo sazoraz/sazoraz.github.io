@@ -135,10 +135,8 @@
     });
   }
   /* ارسال فایل پیوست به تیکت thread؛ cb(err, resp) */
-  function sendAttach(thread, cb) {
-    var f = A.file, t0 = Date.now(); if (!f) return cb();
-    if (f.size > MAXB) return cb(new Error('حجم فایل بیشتر از ۹۸ مگابایت است و ارسال نمی‌شود.'));
-    A.busy = true; A.cancel = false; render();
+  function viaWorker(thread, cb) {
+    var f = A.file, t0 = Date.now();
     var total = f.size <= ONE ? 1 : 2, size = total === 1 ? f.size : Math.ceil(f.size / 2), done = 0, gid = Date.now().toString(36), last = null;
     (function next(i) {
       if (A.cancel) { A.busy = false; return cb(new Error('ارسال لغو شد.')); }
@@ -159,6 +157,53 @@
       })();
     })(1);
   }
+  /* مسیر اصلی: ورکر فقط مجوز می‌دهد؛ فایل مستقیم به دروازهٔ گوگل می‌رود و آن‌جا به تلگرام فرستاده می‌شود */
+  var GCH = 15 * 1048576;
+  function b64Of(blob) { return new Promise(function (ok, no) { var r = new FileReader(); r.onload = function () { ok(String(r.result).split(',')[1] || ''); }; r.onerror = function () { no(new Error('خواندن فایل ناموفق بود.')); }; r.readAsDataURL(blob); }); }
+  function gasPost(url, body, onp) {
+    return new Promise(function (ok, no) {
+      var x = new XMLHttpRequest(); x.open('POST', url); x.setRequestHeader('Content-Type', 'text/plain;charset=utf-8');
+      x.upload.onprogress = function (e) { if (e.lengthComputable) onp(e.loaded / e.total); };
+      x.onload = function () { var d = null; try { d = JSON.parse(x.responseText); } catch (e) {} if (d && d.ok) ok(d); else { var er = new Error((d && d.error) || 'پاسخ نامعتبر از دروازهٔ ارسال.'); er.status = x.status; no(er); } };
+      x.onerror = function () { var er = new Error('ارتباط قطع شد.'); er.net = true; no(er); }; x.ontimeout = x.onerror;
+      x.onabort = function () { var er = new Error('لغو شد.'); er.aborted = true; no(er); };
+      x.timeout = 900000; A.xhr = x; x.send(body);
+    });
+  }
+  function viaGas(thread, tok, cb) {
+    var f = A.file, t0 = Date.now(), total = Math.max(1, Math.ceil(f.size / GCH)), done = 0;
+    (function next(i) {
+      if (A.cancel) { A.busy = false; return cb(new Error('ارسال لغو شد.')); }
+      if (i > total) {
+        return SR.fetch('/api/upload-note', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: tok, fn: f.name, kind: A.kind, total: total }) })
+          .then(function (r) { return r.json().catch(function () { return {}; }); }).then(function (d) { A.busy = false; cb(null, d && d.ok ? d : null); }, function () { A.busy = false; cb(null, null); });
+      }
+      var blob = f.slice((i - 1) * GCH, Math.min(f.size, i * GCH)), tries = 0;
+      b64Of(blob).then(function (b64) {
+        var body = JSON.stringify({ token: tok, fn: f.name, part: i, total: total, kind: A.kind, b64: b64 });
+        (function go() {
+          tries++;
+          gasPost(A.gas, body, function (fr) {
+            var all = done + blob.size * fr, sec = Math.max(1, (Date.now() - t0) / 1000), sp = all / sec;
+            upBar(all / f.size * 100, Math.round(all / f.size * 100).toLocaleString('fa-IR') + '٪ — ' + mb(all) + ' از ' + mb(f.size) + ' — ' + (sp > 1048576 ? mb(sp) : Math.round(sp / 1024).toLocaleString('fa-IR') + ' کیلوبایت') + ' در ثانیه' + (total > 1 ? ' (تکه ' + num(i) + ' از ' + num(total) + ')' : ''));
+          }).then(function () { done += blob.size; next(i + 1); }, function (er) {
+            if (er.aborted || A.cancel) { A.busy = false; return cb(new Error('ارسال لغو شد.')); }
+            if (er.net && tries < 3) { upBar(done / f.size * 100, 'ارتباط قطع شد؛ تلاش دوباره…'); setTimeout(go, 2000); return; }
+            A.busy = false; cb(er);
+          });
+        })();
+      }, function (er) { A.busy = false; cb(er); });
+    })(1);
+  }
+  function sendAttach(thread, cb) {
+    var f = A.file; if (!f) return cb();
+    if (f.size > MAXB) return cb(new Error('حجم فایل بیشتر از ۹۸ مگابایت است و ارسال نمی‌شود.'));
+    A.busy = true; A.cancel = false; render(); upBar(0, 'آماده‌سازی…');
+    SR.fetch('/api/upload-token', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ thread: thread }) })
+      .then(function (r) { if (r.status === 401) { SR.logout(); location.replace('/account/'); throw new Error('401'); } return r.json().catch(function () { return {}; }).then(function (d) { if (!r.ok) throw new Error(d.error || 'مجوز ارسال گرفته نشد.'); return d; }); })
+      .then(function (d) { if (d.url && d.token) { A.gas = d.url; viaGas(thread, d.token, cb); } else viaWorker(thread, cb); },
+        function (er) { A.busy = false; if (er.message !== '401') cb(er); });
+  }
   function toggleRec() {
     if (A.rec) { A.rec.stop(); return; }
     if (!navigator.mediaDevices || !window.MediaRecorder) { upMsg('مرورگر شما ضبط ویس را پشتیبانی نمی‌کند؛ فایل صوتی انتخاب کنید.', 'err'); return; }
@@ -173,6 +218,7 @@
   /* بخش پیوست داخل فرم پیام/پاسخ */
   function attachBox() {
     var w = el('div', 'pn-up'), ui = {}; A.ui = ui;
+    if (S.d && S.d.uploads === false) { ui.rt = el('span'); ui.bar = el('div'); ui.fill = el('i'); ui.lab = el('small'); ui.msg = el('div', 'note-msg'); w.hidden = true; return w; }
     if (!(S.d && S.d.me && S.d.me.premium)) { var pl = el('div', 'pn-up-f'); pl.appendChild(el('small', 'muted', '🔒 ارسال فایل، عکس، ویدیو و ویس ویژهٔ کاربران پرمیوم است. ارسال پیام متنی برای همه رایگان است. ')); var pa = el('a', 'btn btn-dark', 'دریافت پرمیوم'); pa.href = '/shop/'; pl.appendChild(pa); w.appendChild(pl); ui.rt = el('span'); ui.bar = el('div'); ui.fill = el('i'); ui.lab = el('small'); ui.msg = el('div', 'note-msg'); return w; }
     var row = el('div', 'pn-up-r');
     var lb = el('label', 'btn btn-dark', '📎 پیوست فایل / عکس / ویدیو'), fi = el('input'); fi.type = 'file'; fi.hidden = true; fi.disabled = A.busy || !!A.rec;
