@@ -455,3 +455,17 @@ body.pn-on{overflow-x:clip}
 }
 @media(min-width:761px) and (max-width:1040px){.hero-in{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}.deck{max-width:300px}}
 @media(max-width:700px){.sec .grid:not(.v) .card:nth-child(n+4){display:none}}
+
+/* v18: ارسال فایل */
+.pn-up{display:grid;gap:12px}
+.pn-up-r{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.pn-up textarea{width:100%;padding:11px 13px;border-radius:11px;border:2.5px solid var(--ink);background:#11141c;color:var(--text);font:inherit;font-size:15px}
+.pn-up-f{padding:10px 12px;border:2.5px dashed var(--muted);border-radius:12px;word-break:break-all}
+.pn-up-bar{height:14px;border:2.5px solid var(--ink);border-radius:9px;background:#11141c;overflow:hidden}
+.pn-up-bar[hidden]{display:none}
+.pn-up-bar i{display:block;height:100%;width:0;background:var(--c-sheets);transition:width .2s}
+.pn-up .rec-on{background:#ff4d6d;color:#fff}
+.pn-up button:disabled{opacity:.55}
+.pn-nav{grid-template-columns:repeat(5,1fr)}
+.pn-tabs button:nth-child(4)[aria-selected=true],.pn-nav button:nth-child(4).on{background:var(--c-mix)}
+.pn-tabs button:nth-child(5)[aria-selected=true],.pn-nav button:nth-child(5).on{background:var(--c-sheets)}

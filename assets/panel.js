@@ -17,7 +17,7 @@
     bell: P + '<path d="M6 9a6 6 0 0112 0c0 6 2 7 2 7H4s2-1 2-7z"/><path d="M10 20a2 2 0 004 0"/></svg>',
     out: P + '<path d="M9 21H5V3h4M16 17l5-5-5-5M21 12H9"/></svg>'
   };
-  var TABS = [['products', 'محصولات من', 'box'], ['messages', 'پیام‌ها', 'mail'], ['orders', 'سفارش‌ها', 'rec'], ['account', 'حساب', 'user']];
+  var TABS = [['products', 'محصولات من', 'box'], ['messages', 'پیام‌ها', 'mail'], ['orders', 'سفارش‌ها', 'rec'], ['files', 'ارسال فایل', 'send'], ['account', 'حساب', 'user']];
   var ST = { pending: 'در حال تایید', approved: 'تایید شده', rejected: 'رد شده' };
 
   function el(t, c, x) { var e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; }
@@ -114,6 +114,104 @@
     var l = el('div', 'list');
     d.orders.forEach(function (o) { var r = el('div', 'li'), c = el('div'); c.appendChild(el('b', null, 'سفارش #' + num(o.id))); c.appendChild(el('div', 'muted', o.names.join('، '))); c.appendChild(el('small', 'muted', money(o.amount) + ' · ' + fd(o.created))); r.appendChild(c); r.appendChild(el('span', 'st ' + o.status, ST[o.status] || o.status)); l.appendChild(r); });
     return l;
+  }
+
+  /* ---------- ارسال ویس/ویدیو/فایل به ربات (از راه ورکر؛ هیچ‌جا ذخیره نمی‌شود) ---------- */
+  var U = { file: null, kind: 'file', note: '', busy: false, cancel: false, rec: null, comp: false, ui: null };
+  var MAXB = 100 * 1048576, CH = 40 * 1048576, ONE = 45 * 1048576;
+  function mb(n) { return (n / 1048576).toLocaleString('fa-IR', { maximumFractionDigits: 1 }) + ' مگابایت'; }
+  function upMsg(t, cls) { var u = U.ui; if (u && u.msg.isConnected) { u.msg.textContent = t || ''; u.msg.className = 'note-msg' + (t ? ' show ' + (cls || '') : ''); } }
+  function upBar(pct, label) { var u = U.ui; if (u && u.bar.isConnected) { u.bar.hidden = false; u.fill.style.width = Math.max(0, Math.min(100, pct)) + '%'; u.lab.textContent = label || ''; } }
+  function xhrPart(blob, qs, onp) {
+    return new Promise(function (ok, no) {
+      var x = new XMLHttpRequest(), s = SR.session();
+      x.open('POST', SR.api + '/api/upload?' + qs); x.setRequestHeader('Authorization', 'Bearer ' + (s && s.token)); x.setRequestHeader('Content-Type', 'application/octet-stream');
+      x.upload.onprogress = function (e) { if (e.lengthComputable) onp(e.loaded); };
+      x.onload = function () { var d = {}; try { d = JSON.parse(x.responseText); } catch (e) {} if (x.status === 200 && d.ok) ok(); else { var er = new Error(d.error || 'ارسال ناموفق بود.'); er.status = x.status; no(er); } };
+      x.onerror = function () { var er = new Error('ارتباط قطع شد.'); er.net = true; no(er); }; x.ontimeout = x.onerror; x.timeout = 600000;
+      U.xhr = x; x.send(blob);
+    });
+  }
+  function doUpload() {
+    var f = U.file; if (!f || U.busy) return;
+    if (f.size > MAXB) { upMsg('حجم فایل بیشتر از ۱۰۰ مگابایت است. برای ویدیو گزینهٔ «کاهش حجم» را بزنید.', 'err'); return; }
+    U.busy = true; U.cancel = false; render();
+    var total = f.size <= ONE ? 1 : Math.ceil(f.size / CH), size = total === 1 ? f.size : CH, done = 0, gid = Date.now().toString(36);
+    (function next(i) {
+      if (U.cancel) { U.busy = false; render(); upMsg('ارسال لغو شد.'); return; }
+      if (i > total) { U.busy = false; U.file = null; U.note = ''; render(); upMsg('✔ فایل برای ما ارسال شد. ممنون!', 'ok'); return; }
+      var blob = f.slice((i - 1) * size, Math.min(f.size, i * size));
+      var qs = 'fn=' + encodeURIComponent(f.name) + '&part=' + i + '&total=' + total + '&kind=' + U.kind + '&gid=' + gid + '&note=' + encodeURIComponent(U.note || '');
+      var tries = 0;
+      (function go() {
+        tries++;
+        xhrPart(blob, qs, function (loaded) { var all = done + loaded; upBar(all / f.size * 100, 'در حال ارسال… ' + Math.round(all / f.size * 100).toLocaleString('fa-IR') + '٪' + (total > 1 ? ' (تکه ' + num(i) + ' از ' + num(total) + ')' : '')); })
+          .then(function () { done += blob.size; next(i + 1); }, function (er) {
+            if (er.status === 401) { SR.logout(); location.replace('/account/'); return; }
+            if (er.net && tries < 3 && !U.cancel) { upBar(done / f.size * 100, 'ارتباط قطع شد؛ تلاش دوباره…'); setTimeout(go, 2000); return; }
+            U.busy = false; render(); upMsg(er.message || 'ارسال ناموفق بود.', 'err');
+          });
+      })();
+    })(1);
+  }
+  function compressVideo(file) {
+    return new Promise(function (ok, no) {
+      if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) { no(new Error('مرورگر شما از کاهش حجم پشتیبانی نمی‌کند.')); return; }
+      var v = document.createElement('video'), url = URL.createObjectURL(file), wl = null;
+      v.muted = false; v.playsInline = true; v.preload = 'auto'; v.src = url; v.crossOrigin = 'anonymous';
+      function clean() { try { URL.revokeObjectURL(url); } catch (e) {} try { if (wl) wl.release(); } catch (e) {} }
+      v.onerror = function () { clean(); no(new Error('این ویدیو در مرورگر باز نشد. بدون کاهش حجم بفرستید.')); };
+      v.onloadedmetadata = function () {
+        var sc = Math.min(1, 720 / Math.min(v.videoWidth || 720, v.videoHeight || 720)), W = Math.max(2, Math.round((v.videoWidth || 640) * sc / 2) * 2), H = Math.max(2, Math.round((v.videoHeight || 360) * sc / 2) * 2);
+        var cv = document.createElement('canvas'); cv.width = W; cv.height = H; var cx = cv.getContext('2d'), st = cv.captureStream(30);
+        try { var ac = new (window.AudioContext || window.webkitAudioContext)(), src = ac.createMediaElementSource(v), dst = ac.createMediaStreamDestination(); src.connect(dst); dst.stream.getAudioTracks().forEach(function (t) { st.addTrack(t); }); } catch (e) {}
+        var mt = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'].filter(function (m) { return MediaRecorder.isTypeSupported(m); })[0] || '';
+        var rc; try { rc = new MediaRecorder(st, { mimeType: mt, videoBitsPerSecond: 1200000, audioBitsPerSecond: 64000 }); } catch (e) { clean(); no(new Error('کاهش حجم در این مرورگر ممکن نشد.')); return; }
+        var parts = []; rc.ondataavailable = function (e) { if (e.data && e.data.size) parts.push(e.data); };
+        rc.onstop = function () { clean(); if (U.cancel) { no(new Error('لغو شد.')); return; } ok(new Blob(parts, { type: 'video/webm' })); };
+        var raf = 0; function draw() { cx.drawImage(v, 0, 0, W, H); var d = v.duration || 1; upBar(v.currentTime / d * 100, 'در حال کاهش حجم… ' + Math.round(v.currentTime / d * 100).toLocaleString('fa-IR') + '٪ (صفحه را باز و روشن نگه دارید)'); if (U.cancel) { v.pause(); rc.stop(); return; } if (!v.ended) raf = requestAnimationFrame(draw); }
+        v.onended = function () { cancelAnimationFrame(raf); setTimeout(function () { try { rc.stop(); } catch (e) {} }, 300); };
+        try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(function (l) { wl = l; }, function () {}); } catch (e) {}
+        rc.start(1000); v.play().then(function () { draw(); }, function () { clean(); no(new Error('پخش ویدیو برای کاهش حجم مجاز نشد.')); });
+      };
+    });
+  }
+  function startCompress() {
+    var f = U.file; if (!f || U.busy) return; U.busy = true; U.cancel = false; render(); upBar(0, 'آماده‌سازی…');
+    compressVideo(f).then(function (b) {
+      U.busy = false; U.file = new File([b], f.name.replace(/\.[^.]+$/, '') + '.webm', { type: 'video/webm' }); U.kind = 'video'; render();
+      upMsg('✔ حجم از ' + mb(f.size) + ' به ' + mb(b.size) + ' رسید. حالا «ارسال» را بزنید.', 'ok');
+    }, function (er) { U.busy = false; render(); upMsg(er.message || 'کاهش حجم ناموفق بود.', 'err'); });
+  }
+  function toggleRec() {
+    if (U.rec) { U.rec.stop(); return; }
+    if (!navigator.mediaDevices || !window.MediaRecorder) { upMsg('مرورگر شما ضبط ویس را پشتیبانی نمی‌کند؛ فایل صوتی انتخاب کنید.', 'err'); return; }
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+      var ch = [], mt = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'].filter(function (m) { return MediaRecorder.isTypeSupported(m); })[0] || '', r = new MediaRecorder(stream, mt ? { mimeType: mt } : {}), t0 = Date.now(), tm;
+      r.ondataavailable = function (e) { if (e.data && e.data.size) ch.push(e.data); };
+      r.onstop = function () { clearInterval(tm); stream.getTracks().forEach(function (t) { t.stop(); }); U.rec = null; var ty = r.mimeType || 'audio/webm', ext = /mp4/.test(ty) ? 'm4a' : 'webm'; U.file = new File([new Blob(ch, { type: ty })], 'voice-' + Date.now() + '.' + ext, { type: ty }); U.kind = 'voice'; render(); };
+      r.start(); U.rec = r; render();
+      tm = setInterval(function () { var s = Math.floor((Date.now() - t0) / 1000); if (U.ui && U.ui.rt.isConnected) U.ui.rt.textContent = '⏺ ' + Math.floor(s / 60).toLocaleString('fa-IR') + ':' + ('0' + (s % 60)).slice(-2).replace(/\d/g, function (d) { return '۰۱۲۳۴۵۶۷۸۹'[d]; }); if (s >= 600) r.stop(); }, 500);
+    }, function () { upMsg('دسترسی به میکروفون داده نشد.', 'err'); });
+  }
+  function sendTab() {
+    var w = el('div', 'pn-up'), ui = {}; U.ui = ui;
+    w.appendChild(el('p', 'muted', 'ویس، ویدیو یا فایل خود را برای ما بفرستید (تا ۱۰۰ مگابایت در هر ارسال). فایل روی سایت ذخیره نمی‌شود و مستقیم برای ما در تلگرام ارسال می‌شود.'));
+    var row = el('div', 'pn-up-r');
+    var lb = el('label', 'btn btn-dark', 'انتخاب فایل'), fi = el('input'); fi.type = 'file'; fi.hidden = true; fi.disabled = U.busy || !!U.rec;
+    fi.onchange = function () { var f = fi.files && fi.files[0]; if (!f) return; U.file = f; U.kind = /^video\//.test(f.type) ? 'video' : /^audio\//.test(f.type) ? 'voice' : 'file'; render(); }; lb.appendChild(fi); row.appendChild(lb);
+    var rb = btn('btn' + (U.rec ? ' rec-on' : ''), U.rec ? 'پایان ضبط' : '🎙 ضبط ویس', null, toggleRec); rb.disabled = U.busy; row.appendChild(rb);
+    ui.rt = el('span', 'muted', ''); row.appendChild(ui.rt); w.appendChild(row);
+    if (U.file) {
+      var inf = el('div', 'pn-up-f'); inf.appendChild(el('b', null, U.file.name)); inf.appendChild(el('small', 'muted', ' · ' + mb(U.file.size) + (U.file.size > MAXB ? ' — بیش از حد مجاز' : U.file.size > ONE ? ' — در چند تکه ارسال می‌شود' : ''))); w.appendChild(inf);
+      if (U.kind === 'video' && !U.busy && !/\.webm$/i.test(U.file.name)) { var cb = btn('btn btn-dark', '⬇ کاهش حجم ویدیو (زمان‌بر؛ مدتی نزدیک به طول ویدیو)', null, startCompress); w.appendChild(cb); }
+    }
+    var ta = el('textarea'); ta.rows = 2; ta.maxLength = 300; ta.placeholder = 'توضیح کوتاه (اختیاری)'; ta.value = U.note; ta.oninput = function () { U.note = ta.value; }; ta.disabled = U.busy; w.appendChild(ta);
+    ui.bar = el('div', 'pn-up-bar'); ui.bar.hidden = !U.busy; ui.fill = el('i'); ui.lab = el('small', 'muted'); ui.bar.appendChild(ui.fill); w.appendChild(ui.bar); w.appendChild(ui.lab);
+    var sb = btn('btn', U.busy ? 'لغو' : 'ارسال', U.busy ? null : 'send', function () { if (U.busy) { U.cancel = true; try { if (U.xhr) U.xhr.abort(); } catch (e) {} return; } doUpload(); });
+    sb.disabled = !U.busy && !U.file; w.appendChild(sb);
+    ui.msg = el('div', 'note-msg'); w.appendChild(ui.msg);
+    return w;
   }
   function account() {
     var s = SR.session(), me = S.d && S.d.me, w = el('div', 'pn-acc'), l = el('div', 'list');
@@ -234,7 +332,7 @@
     app.textContent = '';
     app.appendChild(hero()); var bn = banners(); if (bn) app.appendChild(bn); app.appendChild(metrics());
     var lay = el('div', 'pn-lay'), main = el('div', 'pn-main'); main.appendChild(tabsBar());
-    var c = el('section', 'box pn-c'); c.appendChild(S.tab === 'messages' ? mail() : S.tab === 'orders' ? orders() : S.tab === 'account' ? account() : products());
+    var c = el('section', 'box pn-c'); c.appendChild(S.tab === 'messages' ? mail() : S.tab === 'orders' ? orders() : S.tab === 'files' ? sendTab() : S.tab === 'account' ? account() : products());
     if (S.err) c.insertBefore(el('p', 'muted', S.err), c.firstChild);
     main.appendChild(c); lay.appendChild(main); lay.appendChild(side()); app.appendChild(lay); app.appendChild(bottomNav());
     window.scrollTo(0, y); app.style.minHeight = '';
