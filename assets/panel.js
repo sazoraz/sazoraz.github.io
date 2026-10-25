@@ -160,15 +160,12 @@
   /* مسیر اصلی: ورکر فقط مجوز می‌دهد؛ فایل مستقیم به دروازهٔ گوگل می‌رود و آن‌جا به تلگرام فرستاده می‌شود */
   var GCH = 15 * 1048576;
   function b64Of(blob) { return new Promise(function (ok, no) { var r = new FileReader(); r.onload = function () { ok(String(r.result).split(',')[1] || ''); }; r.onerror = function () { no(new Error('خواندن فایل ناموفق بود.')); }; r.readAsDataURL(blob); }); }
-  function gasPost(url, body, onp) {
-    return new Promise(function (ok, no) {
-      var x = new XMLHttpRequest(); x.open('POST', url); x.setRequestHeader('Content-Type', 'text/plain;charset=utf-8');
-      x.upload.onprogress = function (e) { if (e.lengthComputable) onp(e.loaded / e.total); };
-      x.onload = function () { var d = null; try { d = JSON.parse(x.responseText); } catch (e) {} if (d && d.ok) ok(d); else { var er = new Error((d && d.error) || 'پاسخ نامعتبر از دروازهٔ ارسال.'); er.status = x.status; no(er); } };
-      x.onerror = function () { var er = new Error('ارتباط قطع شد.'); er.net = true; no(er); }; x.ontimeout = x.onerror;
-      x.onabort = function () { var er = new Error('لغو شد.'); er.aborted = true; no(er); };
-      x.timeout = 900000; A.xhr = x; x.send(body);
-    });
+  /* مهم: با fetch و text/plain (بدون شنونده‌ی upload) تا مرورگر درخواست آزمایشی (preflight) نفرستد؛ Apps Script به آن جواب نمی‌دهد */
+  function gasPost(url, body) {
+    var ac = new AbortController(); A.xhr = { abort: function () { ac.abort(); } };
+    return fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: body, signal: ac.signal, redirect: 'follow' })
+      .then(function (r) { return r.text().then(function (t) { var d = null; try { d = JSON.parse(t); } catch (e) {} if (d && d.ok) return d; var er = new Error((d && d.error) || ('پاسخ نامعتبر از دروازهٔ ارسال (کد ' + r.status + ').')); er.status = r.status; throw er; }); },
+        function (e) { var er = new Error(e && e.name === 'AbortError' ? 'لغو شد.' : 'ارتباط با دروازهٔ ارسال برقرار نشد.'); if (e && e.name === 'AbortError') er.aborted = true; else er.net = true; throw er; });
   }
   function viaGas(thread, tok, cb) {
     var f = A.file, t0 = Date.now(), total = Math.max(1, Math.ceil(f.size / GCH)), done = 0;
@@ -183,10 +180,11 @@
         var body = JSON.stringify({ token: tok, fn: f.name, part: i, total: total, kind: A.kind, b64: b64 });
         (function go() {
           tries++;
-          gasPost(A.gas, body, function (fr) {
-            var all = done + blob.size * fr, sec = Math.max(1, (Date.now() - t0) / 1000), sp = all / sec;
-            upBar(all / f.size * 100, Math.round(all / f.size * 100).toLocaleString('fa-IR') + '٪ — ' + mb(all) + ' از ' + mb(f.size) + ' — ' + (sp > 1048576 ? mb(sp) : Math.round(sp / 1024).toLocaleString('fa-IR') + ' کیلوبایت') + ' در ثانیه' + (total > 1 ? ' (تکه ' + num(i) + ' از ' + num(total) + ')' : ''));
-          }).then(function () { done += blob.size; next(i + 1); }, function (er) {
+          upBar(done / f.size * 100, 'در حال ارسال تکه ' + num(i) + ' از ' + num(total) + '… (' + mb(blob.size) + ')');
+          gasPost(A.gas, body).then(function () {
+            done += blob.size; var sec = Math.max(1, (Date.now() - t0) / 1000), sp = done / sec;
+            upBar(done / f.size * 100, Math.round(done / f.size * 100).toLocaleString('fa-IR') + '٪ — ' + mb(done) + ' از ' + mb(f.size) + ' — ' + (sp > 1048576 ? mb(sp) : Math.round(sp / 1024).toLocaleString('fa-IR') + ' کیلوبایت') + ' در ثانیه');
+            next(i + 1); }, function (er) {
             if (er.aborted || A.cancel) { A.busy = false; return cb(new Error('ارسال لغو شد.')); }
             if (er.net && tries < 3) { upBar(done / f.size * 100, 'ارتباط قطع شد؛ تلاش دوباره…'); setTimeout(go, 2000); return; }
             A.busy = false; cb(er);
@@ -226,7 +224,7 @@
     var rb = btn('btn' + (A.rec ? ' rec-on' : ''), A.rec ? 'پایان ضبط' : '🎙 ضبط ویس', null, toggleRec); rb.disabled = A.busy; row.appendChild(rb);
     ui.rt = el('span', 'muted', ''); row.appendChild(ui.rt); w.appendChild(row);
     if (A.file) {
-      var inf = el('div', 'pn-up-f'); inf.appendChild(el('b', null, A.file.name)); inf.appendChild(el('small', 'muted', ' · ' + mb(A.file.size) + (A.file.size > MAXB ? ' — بیش از حد مجاز (حداکثر ۹۸ مگابایت)' : A.file.size > ONE ? ' — خودکار در دو تکه ارسال می‌شود' : '')));
+      var inf = el('div', 'pn-up-f'); inf.appendChild(el('b', null, A.file.name)); inf.appendChild(el('small', 'muted', ' · ' + mb(A.file.size) + (A.file.size > MAXB ? ' — بیش از حد مجاز (حداکثر ۹۸ مگابایت)' : A.file.size > GCH ? ' — خودکار در چند تکه ارسال می‌شود' : '')));
       if (!A.busy) inf.appendChild(btn('pn-x', '✕ حذف', null, function () { A.file = null; A.st = null; render(); }));
       w.appendChild(inf);
     }
