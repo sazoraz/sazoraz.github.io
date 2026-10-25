@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>چسباندن تکه‌های فایل</title>
+<style>
+body{margin:0;background:#0e1118;color:#e9ebf2;font-family:Vazirmatn,Tahoma,sans-serif;line-height:1.9}
+main{max-width:560px;margin:0 auto;padding:20px 16px;display:grid;gap:14px}
+h1{font-size:20px;margin:0}p,small{color:#9aa1b3;margin:0}
+label.b,button{display:block;text-align:center;padding:12px 16px;border-radius:12px;border:3px solid #000;background:#ffd166;color:#111;font:inherit;font-weight:800;cursor:pointer}
+button:disabled{opacity:.5}
+ul{margin:0;padding:12px 28px;border:2px dashed #3a4156;border-radius:12px;word-break:break-all}
+.ok{color:#6ee7b7}.er{color:#ff8fa3}
+</style></head><body><main>
+<h1>چسباندن تکه‌های فایل</h1>
+<p>فایل‌های بزرگ از سایت در چند تکه به ربات می‌رسند (نام‌ها مثل <b dir="ltr">video.mp4.part1-3</b>). همهٔ تکه‌ها را از تلگرام ذخیره کن و این‌جا انتخاب کن تا فایل کامل ساخته شود. چیزی آپلود نمی‌شود و همه‌چیز داخل مرورگر انجام می‌شود.</p>
+<label class="b">انتخاب همهٔ تکه‌ها<input id="f" type="file" multiple hidden></label>
+<ul id="l" hidden></ul>
+<div id="m"></div>
+<button id="go" disabled>ساخت فایل کامل</button>
+</main>
+<script>
+(function(){
+var f=document.getElementById('f'),l=document.getElementById('l'),m=document.getElementById('m'),go=document.getElementById('go'),parts=[],name='';
+function say(t,c){m.className=c||'';m.textContent=t}
+f.onchange=function(){
+  parts=[];go.disabled=true;l.hidden=true;l.textContent='';say('');
+  var fs=[].slice.call(f.files),tot=0,base=null,ok=true;
+  fs.forEach(function(x){
+    var r=/^(.*?)(?:\s*\(\d+\))?\.part(\d+)-(\d+)$/.exec(x.name);
+    if(!r){ok=false;return}
+    var i=+r[2],t=+r[3];if(base===null){base=r[1];tot=t}
+    if(r[1]!==base||t!==tot)ok=false;parts[i]=x;
+  });
+  if(!fs.length)return;
+  if(!ok){say('نام‌ها درست نیست؛ فقط تکه‌های یک فایل را انتخاب کن.','er');parts=[];return}
+  var miss=[];for(var i=1;i<=tot;i++){if(!parts[i])miss.push(i)}
+  parts.slice(1).forEach(function(x,i){var li=document.createElement('li');li.textContent=x?(i+1)+'. '+x.name+' — '+(x.size/1048576).toFixed(1)+' MB':'';if(x)l.appendChild(li)});l.hidden=false;
+  if(miss.length){say('تکهٔ '+miss.join('، ')+' از '+tot+' کم است.','er');return}
+  name=base;say('همهٔ '+tot+' تکه موجود است.','ok');go.disabled=false;
+};
+go.onclick=function(){
+  var b=new Blob(parts.slice(1)),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();a.remove();
+  say('فایل «'+name+'» ساخته شد ('+(b.size/1048576).toFixed(1)+' MB).','ok');
+};
+})();
+</script></body></html>
