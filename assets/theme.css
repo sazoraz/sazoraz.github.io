@@ -466,6 +466,5 @@ body.pn-on{overflow-x:clip}
 .pn-up-bar i{display:block;height:100%;width:0;background:var(--c-sheets);transition:width .2s}
 .pn-up .rec-on{background:#ff4d6d;color:#fff}
 .pn-up button:disabled{opacity:.55}
-.pn-nav{grid-template-columns:repeat(5,1fr)}
-.pn-tabs button:nth-child(4)[aria-selected=true],.pn-nav button:nth-child(4).on{background:var(--c-mix)}
-.pn-tabs button:nth-child(5)[aria-selected=true],.pn-nav button:nth-child(5).on{background:var(--c-sheets)}
+.pn-up-f .pn-x{margin-inline-start:8px;background:none;border:0;color:#ff8fa3;font:inherit;font-size:12px;cursor:pointer}
+.fm .pn-up{margin:0}
