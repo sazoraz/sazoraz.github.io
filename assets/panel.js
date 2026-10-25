@@ -168,16 +168,16 @@
         function (e) { var er = new Error(e && e.name === 'AbortError' ? 'لغو شد.' : 'ارتباط با دروازهٔ ارسال برقرار نشد.'); if (e && e.name === 'AbortError') er.aborted = true; else er.net = true; throw er; });
   }
   function viaGas(thread, tok, cb) {
-    var f = A.file, t0 = Date.now(), total = Math.max(1, Math.ceil(f.size / GCH)), done = 0;
+    var f = A.file, t0 = Date.now(), total = Math.max(1, Math.ceil(f.size / GCH)), done = 0, gid = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     (function next(i) {
       if (A.cancel) { A.busy = false; return cb(new Error('ارسال لغو شد.')); }
       if (i > total) {
-        return SR.fetch('/api/upload-note', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: tok, fn: f.name, kind: A.kind, total: total }) })
+        return SR.fetch('/api/upload-note', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: tok, fn: f.name, kind: A.kind, total: 1 }) })
           .then(function (r) { return r.json().catch(function () { return {}; }); }).then(function (d) { A.busy = false; cb(null, d && d.ok ? d : null); }, function () { A.busy = false; cb(null, null); });
       }
       var blob = f.slice((i - 1) * GCH, Math.min(f.size, i * GCH)), tries = 0;
       b64Of(blob).then(function (b64) {
-        var body = JSON.stringify({ token: tok, fn: f.name, part: i, total: total, kind: A.kind, b64: b64 });
+        var body = JSON.stringify({ token: tok, fn: f.name, part: i, total: total, kind: A.kind, size: f.size, off: (i - 1) * GCH, gid: gid, b64: b64 });
         (function go() {
           tries++;
           upBar(done / f.size * 100, 'در حال ارسال تکه ' + num(i) + ' از ' + num(total) + '… (' + mb(blob.size) + ')');
@@ -224,7 +224,7 @@
     var rb = btn('btn' + (A.rec ? ' rec-on' : ''), A.rec ? 'پایان ضبط' : '🎙 ضبط ویس', null, toggleRec); rb.disabled = A.busy; row.appendChild(rb);
     ui.rt = el('span', 'muted', ''); row.appendChild(ui.rt); w.appendChild(row);
     if (A.file) {
-      var inf = el('div', 'pn-up-f'); inf.appendChild(el('b', null, A.file.name)); inf.appendChild(el('small', 'muted', ' · ' + mb(A.file.size) + (A.file.size > MAXB ? ' — بیش از حد مجاز (حداکثر ۹۸ مگابایت)' : A.file.size > GCH ? ' — خودکار در چند تکه ارسال می‌شود' : '')));
+      var inf = el('div', 'pn-up-f'); inf.appendChild(el('b', null, A.file.name)); inf.appendChild(el('small', 'muted', ' · ' + mb(A.file.size) + (A.file.size > MAXB ? ' — بیش از حد مجاز (حداکثر ۹۸ مگابایت)' : A.file.size > GCH ? ' — در چند مرحله ارسال می‌شود (برای ما یک فایل کامل می‌رسد)' : '')));
       if (!A.busy) inf.appendChild(btn('pn-x', '✕ حذف', null, function () { A.file = null; A.st = null; render(); }));
       w.appendChild(inf);
     }
