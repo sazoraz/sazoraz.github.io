@@ -118,18 +118,7 @@
 
   /* ---------- پیوست ویس/عکس/ویدیو/فایل در تیکت پشتیبانی (از راه ورکر به تلگرام؛ ذخیره نمی‌شود) ---------- */
   var A = { file: null, kind: 'file', busy: false, cancel: false, rec: null, xhr: null, ui: null, st: null };
-  var MAXB = 100 * 1048576, CH = 40 * 1048576, ONE = 45 * 1048576, VEXT = /\.(mp4|mov|mkv|avi|3gp|m4v|webm|ts)$/i;
-  function idb(mode, fn) { return new Promise(function (ok, no) { try { var r = indexedDB.open('sr_att', 1); r.onupgradeneeded = function () { r.result.createObjectStore('f'); }; r.onsuccess = function () { var tx = r.result.transaction('f', mode), q = fn(tx.objectStore('f')); tx.oncomplete = function () { ok(q && q.result); }; tx.onerror = function () { no(tx.error); }; }; r.onerror = function () { no(r.error); }; } catch (e) { no(e); } }); }
-  function savedPut(f) { return idb('readwrite', function (s) { return s.put({ blob: f, name: f.name, type: f.type }, 'att'); }).catch(function () {}); }
-  function savedDel() { return idb('readwrite', function (s) { return s.delete('att'); }).catch(function () {}); }
-  function mark(v) { try { if (v) localStorage.setItem('sr_comp', String(Date.now())); else localStorage.removeItem('sr_comp'); } catch (e) {} }
-  function restoreAtt() {
-    var crashed = false; try { crashed = !!localStorage.getItem('sr_comp'); } catch (e) {} mark(false);
-    idb('readonly', function (s) { return s.get('att'); }).then(function (x) {
-      if (x && x.blob && !A.file) { A.file = new File([x.blob], x.name, { type: x.type }); A.kind = kindOf(A.file); A.st = { t: '✔ ویدیوی کاهش‌حجم‌یافتهٔ قبلی بازیابی شد؛ «پیام جدید» را بزنید و ارسال کنید.', c: 'ok' }; render(); }
-      else if (crashed) { A.st = { t: 'صفحه هنگام کاهش حجم بسته شد (احتمالاً کمبود حافظهٔ گوشی). ویدیو را کوتاه‌تر کنید یا بدون کاهش حجم بفرستید.', c: 'err' }; }
-    }).catch(function () {});
-  }
+  var MAXB = 98 * 1048576, ONE = 49 * 1048576, VEXT = /\.(mp4|mov|mkv|avi|3gp|m4v|webm|ts)$/i;
   function mb(n) { return (n / 1048576).toLocaleString('fa-IR', { maximumFractionDigits: 1 }) + ' مگابایت'; }
   function kindOf(f) { return /^video\//.test(f.type) || VEXT.test(f.name) ? 'video' : /^audio\//.test(f.type) ? 'voice' : 'file'; }
   function upMsg(t, cls) { A.st = t ? { t: t, c: cls || '' } : null; var u = A.ui; if (u && u.msg.isConnected) { u.msg.textContent = t || ''; u.msg.className = 'note-msg' + (t ? ' show ' + (cls || '') : ''); } }
@@ -148,9 +137,9 @@
   /* ارسال فایل پیوست به تیکت thread؛ cb(err, resp) */
   function sendAttach(thread, cb) {
     var f = A.file, t0 = Date.now(); if (!f) return cb();
-    if (f.size > MAXB) return cb(new Error('حجم فایل بیشتر از ۱۰۰ مگابایت است. برای ویدیو «کاهش حجم» را بزنید.'));
+    if (f.size > MAXB) return cb(new Error('حجم فایل بیشتر از ۹۸ مگابایت است و ارسال نمی‌شود.'));
     A.busy = true; A.cancel = false; render();
-    var total = f.size <= ONE ? 1 : Math.ceil(f.size / CH), size = total === 1 ? f.size : CH, done = 0, gid = Date.now().toString(36), last = null;
+    var total = f.size <= ONE ? 1 : 2, size = total === 1 ? f.size : Math.ceil(f.size / 2), done = 0, gid = Date.now().toString(36), last = null;
     (function next(i) {
       if (A.cancel) { A.busy = false; return cb(new Error('ارسال لغو شد.')); }
       if (i > total) { A.busy = false; return cb(null, last); }
@@ -170,35 +159,6 @@
       })();
     })(1);
   }
-  function compressVideo(file) {
-    return new Promise(function (ok, no) {
-      if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) { no(new Error('مرورگر شما از کاهش حجم پشتیبانی نمی‌کند.')); return; }
-      var v = document.createElement('video'), url = URL.createObjectURL(file), wl = null;
-      v.muted = false; v.playsInline = true; v.preload = 'auto'; v.src = url;
-      function clean() { try { v.pause(); v.removeAttribute('src'); v.load(); } catch (e) {} try { URL.revokeObjectURL(url); } catch (e) {} try { if (wl) wl.release(); } catch (e) {} }
-      v.onerror = function () { clean(); no(new Error('این ویدیو در مرورگر باز نشد. بدون کاهش حجم بفرستید.')); };
-      v.onloadedmetadata = function () {
-        var sc = Math.min(1, 540 / Math.min(v.videoWidth || 540, v.videoHeight || 540)), W = Math.max(2, Math.round((v.videoWidth || 640) * sc / 2) * 2), H = Math.max(2, Math.round((v.videoHeight || 360) * sc / 2) * 2);
-        var cv = document.createElement('canvas'); cv.width = W; cv.height = H; var cx = cv.getContext('2d'), st = cv.captureStream(24), ac = null;
-        try { ac = new (window.AudioContext || window.webkitAudioContext)(); var src = ac.createMediaElementSource(v), dst = ac.createMediaStreamDestination(); src.connect(dst); dst.stream.getAudioTracks().forEach(function (t) { st.addTrack(t); }); } catch (e) {}
-        var mt = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'].filter(function (m) { return MediaRecorder.isTypeSupported(m); })[0] || '';
-        var rc; try { rc = new MediaRecorder(st, { mimeType: mt, videoBitsPerSecond: 1000000, audioBitsPerSecond: 64000 }); } catch (e) { clean(); no(new Error('کاهش حجم در این مرورگر ممکن نشد.')); return; }
-        var parts = []; rc.ondataavailable = function (e) { if (e.data && e.data.size) parts.push(e.data); };
-        rc.onstop = function () { try { st.getTracks().forEach(function (t) { t.stop(); }); if (ac) ac.close(); } catch (e) {} clean(); if (A.cancel) { no(new Error('لغو شد.')); return; } ok(new Blob(parts, { type: 'video/webm' })); };
-        var raf = 0; function draw() { cx.drawImage(v, 0, 0, W, H); var d = v.duration || 1; upBar(v.currentTime / d * 100, 'در حال کاهش حجم… ' + Math.round(v.currentTime / d * 100).toLocaleString('fa-IR') + '٪ (صفحه را باز و روشن نگه دارید)'); if (A.cancel) { v.pause(); try { rc.stop(); } catch (e) {} return; } if (!v.ended) raf = requestAnimationFrame(draw); }
-        v.onended = function () { cancelAnimationFrame(raf); setTimeout(function () { try { rc.stop(); } catch (e) {} }, 300); };
-        try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(function (l) { wl = l; }, function () {}); } catch (e) {}
-        rc.start(1000); v.play().then(function () { draw(); }, function () { clean(); no(new Error('پخش ویدیو برای کاهش حجم مجاز نشد.')); });
-      };
-    });
-  }
-  function startCompress() {
-    var f = A.file; if (!f || A.busy) return; A.busy = true; A.cancel = false; mark(true); render(); upBar(0, 'آماده‌سازی…');
-    compressVideo(f).then(function (b) {
-      A.busy = false; A.file = new File([b], f.name.replace(/\.[^.]+$/, '') + '.webm', { type: 'video/webm' }); A.kind = 'video'; savedPut(A.file).then(function () { mark(false); }); render();
-      upMsg('✔ حجم از ' + mb(f.size) + ' به ' + mb(b.size) + ' رسید.', 'ok');
-    }, function (er) { mark(false); A.busy = false; render(); upMsg(er.message || 'کاهش حجم ناموفق بود.', 'err'); });
-  }
   function toggleRec() {
     if (A.rec) { A.rec.stop(); return; }
     if (!navigator.mediaDevices || !window.MediaRecorder) { upMsg('مرورگر شما ضبط ویس را پشتیبانی نمی‌کند؛ فایل صوتی انتخاب کنید.', 'err'); return; }
@@ -213,19 +173,16 @@
   /* بخش پیوست داخل فرم پیام/پاسخ */
   function attachBox() {
     var w = el('div', 'pn-up'), ui = {}; A.ui = ui;
+    if (!(S.d && S.d.me && S.d.me.premium)) { var pl = el('div', 'pn-up-f'); pl.appendChild(el('small', 'muted', '🔒 ارسال فایل، عکس، ویدیو و ویس ویژهٔ کاربران پرمیوم است. ارسال پیام متنی برای همه رایگان است. ')); var pa = el('a', 'btn btn-dark', 'دریافت پرمیوم'); pa.href = '/shop/'; pl.appendChild(pa); w.appendChild(pl); ui.rt = el('span'); ui.bar = el('div'); ui.fill = el('i'); ui.lab = el('small'); ui.msg = el('div', 'note-msg'); return w; }
     var row = el('div', 'pn-up-r');
     var lb = el('label', 'btn btn-dark', '📎 پیوست فایل / عکس / ویدیو'), fi = el('input'); fi.type = 'file'; fi.hidden = true; fi.disabled = A.busy || !!A.rec;
-    fi.onchange = function () { var f = fi.files && fi.files[0]; if (!f) return; A.file = f; A.kind = kindOf(f); A.st = null; savedDel(); render(); }; lb.appendChild(fi); row.appendChild(lb);
+    fi.onchange = function () { var f = fi.files && fi.files[0]; if (!f) return; A.file = f; A.kind = kindOf(f); A.st = null; render(); }; lb.appendChild(fi); row.appendChild(lb);
     var rb = btn('btn' + (A.rec ? ' rec-on' : ''), A.rec ? 'پایان ضبط' : '🎙 ضبط ویس', null, toggleRec); rb.disabled = A.busy; row.appendChild(rb);
     ui.rt = el('span', 'muted', ''); row.appendChild(ui.rt); w.appendChild(row);
     if (A.file) {
-      var inf = el('div', 'pn-up-f'); inf.appendChild(el('b', null, A.file.name)); inf.appendChild(el('small', 'muted', ' · ' + mb(A.file.size) + (A.file.size > MAXB ? ' — بیش از حد مجاز' : A.file.size > ONE ? ' — در چند تکه ارسال می‌شود' : '')));
-      if (!A.busy) inf.appendChild(btn('pn-x', '✕ حذف', null, function () { A.file = null; A.st = null; savedDel(); render(); }));
+      var inf = el('div', 'pn-up-f'); inf.appendChild(el('b', null, A.file.name)); inf.appendChild(el('small', 'muted', ' · ' + mb(A.file.size) + (A.file.size > MAXB ? ' — بیش از حد مجاز (حداکثر ۹۸ مگابایت)' : A.file.size > ONE ? ' — خودکار در دو تکه ارسال می‌شود' : '')));
+      if (!A.busy) inf.appendChild(btn('pn-x', '✕ حذف', null, function () { A.file = null; A.st = null; render(); }));
       w.appendChild(inf);
-      if (A.kind === 'video' && !A.busy && !/\.webm$/i.test(A.file.name)) {
-        if (A.file.size > 15 * 1048576) w.appendChild(el('small', 'muted', 'ارسال با اینترنت ایران کند است؛ برای ویدیو توصیه می‌شود اول حجم را کم کنید (چند برابر سریع‌تر می‌شود).'));
-        w.appendChild(btn('btn btn-dark', '⬇ کاهش حجم ویدیو (زمان‌بر؛ نزدیک به طول ویدیو)', null, startCompress));
-      }
     }
     ui.bar = el('div', 'pn-up-bar'); ui.bar.hidden = !A.busy; ui.fill = el('i'); ui.lab = el('small', 'muted'); ui.bar.appendChild(ui.fill); w.appendChild(ui.bar); w.appendChild(ui.lab);
     if (A.busy) w.appendChild(btn('btn btn-dark', 'لغو', null, function () { A.cancel = true; try { if (A.xhr) A.xhr.abort(); } catch (e) {} }));
@@ -239,7 +196,7 @@
       if (er) { render(); upMsg(er.message + (A.file ? ' — پیام شما ثبت شده؛ برای تلاش دوباره «ارسال پاسخ» را بزنید.' : ''), 'err'); return; }
       var nm = A.file ? A.file.name : '';
       if (d && d.id) S.d.messages.unshift({ id: d.id, thread: thread, dir: 1, subject: '', body: d.body || ('📎 پیوست: ' + nm), created: d.created || Date.now(), broadcast: false, read: true });
-      A.file = null; savedDel(); save(); render(); upMsg('✔ پیوست ارسال شد.', 'ok');
+      A.file = null; save(); render(); upMsg('✔ پیوست ارسال شد.', 'ok');
     });
   }
   function account() {
@@ -376,7 +333,7 @@
     if (!SR.api) { app.textContent = 'آدرس سرور در تنظیمات سایت ثبت نشده است.'; return; }
     document.body.classList.add('pn-on');
     var h = (location.hash || '').slice(1); if (TABS.some(function (t) { return t[0] === h; })) S.tab = h;
-    var cached = load(); S.d = cached; render(); restoreAtt();
+    var cached = load(); S.d = cached; render();
     fetch('/data/announcements.json?t=' + Math.floor(Date.now() / 30000), { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : { items: [] }; }).catch(function () { return { items: [] }; }).then(function (a) { S.ann = (a && a.items) || []; if (S.ann.length) render(); });
     api('/api/panel').then(function (d) {
       var changed = !cached || JSON.stringify(cached) !== JSON.stringify(d);
