@@ -197,7 +197,7 @@
     var f = A.file; if (!f) return cb();
     if (f.size > MAXB) return cb(new Error('حجم فایل بیشتر از ۹۸ مگابایت است و ارسال نمی‌شود.'));
     A.busy = true; A.cancel = false; render(); upBar(0, 'آماده‌سازی…');
-    SR.fetch('/api/upload-token', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ thread: thread }) })
+    SR.fetch('/api/upload-token', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ thread: thread, size: f.size }) })
       .then(function (r) { if (r.status === 401) { SR.logout(); location.replace('/account/'); throw new Error('401'); } return r.json().catch(function () { return {}; }).then(function (d) { if (!r.ok) throw new Error(d.error || 'مجوز ارسال گرفته نشد.'); return d; }); })
       .then(function (d) { if (d.url && d.token) { A.gas = d.url; viaGas(thread, d.token, cb); } else viaWorker(thread, cb); },
         function (er) { A.busy = false; if (er.message !== '401') cb(er); });
