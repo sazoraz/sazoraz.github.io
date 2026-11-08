@@ -2,6 +2,16 @@
  "posts": [
   {
    "cat": "compose",
+   "title": "آموزش ساخت گام پنتاتونیک؛ راهنمای کاربردی برای آهنگسازان",
+   "desc": "گام پنتاتونیک با ساختار پنج‌نتی خود، ابزاری قدرتمند برای خلق ملودی‌های ماندگار در سبک‌های جز و بلوز است. در این مقاله نحوه ساخت آن را بیاموزید.",
+   "img": "/assets/img/pentatonic-scale-construction-guide/1.gif",
+   "tag": "تئوری موسیقی",
+   "meta": "2 دقیقه مطالعه",
+   "href": "/compose/pentatonic-scale-construction-guide/",
+   "date": "2013-08-04"
+  },
+  {
+   "cat": "compose",
    "title": "میکس با هدفون و تکنیک Crossfeed (بخش دوم)",
    "desc": "در بخش دوم بررسی میکس در هدفون، با مفهوم Crossfeed، نحوه شبیه‌سازی آن و ابزارهای وی‌اس‌تی برای بهبود کیفیت کار آشنا شوید.",
    "img": "/assets/img/mix-with-headphones-crossfeed-part-2/2.webp",
