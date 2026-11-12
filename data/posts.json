@@ -2,6 +2,16 @@
  "posts": [
   {
    "cat": "compose",
+   "title": "آشنایی با DAW های آنلاین؛ انقلاب ساخت موسیقی در اینترنت",
+   "desc": "با رشد فناوری و اینترنت، DAW های آنلاین امکان ساخت و تنظیم دسته جمعی آهنگ‌ها را فراهم کرده‌اند. با این ابزارهای ابری و قابلیت‌هایشان آشنا شوید.",
+   "img": "/assets/img/online-daws-and-cloud-music-production/1.webp",
+   "tag": "آهنگسازی",
+   "meta": "5 دقیقه مطالعه",
+   "href": "/compose/online-daws-and-cloud-music-production/",
+   "date": "2014-01-02"
+  },
+  {
+   "cat": "compose",
    "title": "بهینه سازی Kontakt برای کاهش مصرف CPU و RAM",
    "desc": "آموزش جامع بهینه سازی Kontakt برای کاهش مصرف پردازنده و رم در پروژه های آهنگسازی و تنظیم با چند ترفند کاربردی و ساده.",
    "img": "/assets/img/kontakt-optimization-guide/1.webp",
