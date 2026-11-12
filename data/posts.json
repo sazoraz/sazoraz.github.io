@@ -2,6 +2,16 @@
  "posts": [
   {
    "cat": "compose",
+   "title": "بهینه سازی Kontakt برای کاهش مصرف CPU و RAM",
+   "desc": "آموزش جامع بهینه سازی Kontakt برای کاهش مصرف پردازنده و رم در پروژه های آهنگسازی و تنظیم با چند ترفند کاربردی و ساده.",
+   "img": "/assets/img/kontakt-optimization-guide/1.webp",
+   "tag": "آموزش",
+   "meta": "5 دقیقه مطالعه",
+   "href": "/compose/kontakt-optimization-guide/",
+   "date": "2013-12-15"
+  },
+  {
+   "cat": "compose",
    "title": "مصاحبه با رئیس کمپانی کیک‌واک درباره نرم‌افزار Sonar X3",
    "desc": "نرم‌افزار Sonar X3 منتشر شد و به این مناسبت مصاحبه‌ای جذاب با مایکل هوور، رئیس کمپانی Cakewalk، درباره ویژگی‌ها و آینده این نرم‌افزار انجام شده است.",
    "img": "/assets/img/sonar-x3-release-interview/1.webp",
