@@ -2,6 +2,16 @@
  "posts": [
   {
    "cat": "compose",
+   "title": "نسل جدید میکروفن و زنجیره ضبط؛ معرفی سیستم VMS",
+   "desc": "با سیستم VMS از کمپانی اسلیت دیجیتال آشنا شوید؛ پکیجی شامل میکروفن، پری‌امپ و پلاگین برای شبیه سازی دقیق برترین میکروفن‌های کلاسیک جهان.",
+   "img": "/assets/img/nasle-jadid-microphone-va-zanjire-zabt-vms/1.webp",
+   "tag": "تجهیزات",
+   "meta": "3 دقیقه مطالعه",
+   "href": "/compose/nasle-jadid-microphone-va-zanjire-zabt-vms/",
+   "date": "2014-02-11"
+  },
+  {
+   "cat": "compose",
    "title": "آشنایی با DAW های آنلاین؛ انقلاب ساخت موسیقی در اینترنت",
    "desc": "با رشد فناوری و اینترنت، DAW های آنلاین امکان ساخت و تنظیم دسته جمعی آهنگ‌ها را فراهم کرده‌اند. با این ابزارهای ابری و قابلیت‌هایشان آشنا شوید.",
    "img": "/assets/img/online-daws-and-cloud-music-production/1.webp",
