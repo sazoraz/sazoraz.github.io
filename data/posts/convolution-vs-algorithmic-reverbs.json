@@ -1,0 +1,127 @@
+{
+ "slug": "convolution-vs-algorithmic-reverbs",
+ "cat": "compose",
+ "title": "تفاوت کانولوشن و الگوریتمیک ریورب ها در تولید موسیقی",
+ "desc": "کانولوشن و الگوریتمیک ریورب ها دو نوع اصلی افکت بازتاب صدا هستند که با فناوری‌های متفاوتی محیط‌های متنوع را شبیه‌سازی می‌کنند.",
+ "tag": "ریورب",
+ "img": "/assets/img/convolution-vs-algorithmic-reverbs/1.webp",
+ "imgAlt": "",
+ "date": "2013-08-30",
+ "updated": "2023-06-02",
+ "author": "دامون آرمانی نژاد",
+ "comments": true,
+ "blocks": [
+  {
+   "t": "paragraph",
+   "id": "kxos74",
+   "text": "کانولوشن و الگوریتمیک ریورب ها دو دسته اصلی از افکت‌های بازتاب صدا هستند که در صنعت صدا و [میکس و مسترینگ](/mixing/) کاربرد فراوانی دارند. خیلی از زمانی که تنها نوع دیجیتال ریورب، نمونه‌های الگوریتمیک بودند نمی‌گذرد."
+  },
+  {
+   "t": "heading",
+   "id": "ks7aro",
+   "level": 2,
+   "text": "آشنایی با ریورب‌های الگوریتمیک"
+  },
+  {
+   "t": "paragraph",
+   "id": "kindu4",
+   "text": "این گونه از ریورب‌ها بر پایه تاخیرهای دقیق و بازخورد صدا بر اساس الگوریتمی بودند که برای آن‌ها نوشته می‌شد. معروف‌ترین کمپانی‌های فعال در این زمینه لکسیکون (Lexicon) و تی‌سی الکترونیک (TC Electronic) هستند."
+  },
+  {
+   "t": "image",
+   "id": "kswg5a",
+   "src": "/assets/img/convolution-vs-algorithmic-reverbs/2.webp",
+   "alt": "پلاگین ریورب الگوریتمیک لکسیکون",
+   "caption": "Lexicon"
+  },
+  {
+   "t": "image",
+   "id": "k25czi",
+   "src": "/assets/img/convolution-vs-algorithmic-reverbs/3.webp",
+   "alt": "دستگاه ریورب الگوریتمیک یونیورسال آیدیو EMT 250",
+   "caption": "Universal Audio EMT 250"
+  },
+  {
+   "t": "heading",
+   "id": "k6avtg",
+   "level": 2,
+   "text": "آشنایی با کانولوشن ریورب"
+  },
+  {
+   "t": "paragraph",
+   "id": "kau4kf",
+   "text": "اما کارکرد Convolution Reverbها متفاوت است. این گونه ریورب‌ها بر پایه نمونه‌گیری‌های ضبط‌شده در محیط‌های آکوستیک طبیعی می‌باشند."
+  },
+  {
+   "t": "paragraph",
+   "id": "k15k2j",
+   "text": "این ابزارها با بررسی impulse response (پاسخ ضربه‌ای)، ثبت، ضبط و وارد کردن آن‌ها در دیجیتال ریورب، محیط‌های واقعی را شبیه‌سازی می‌کنند. این امکان برای ما میسر می‌شود که صدای خود را در آن مکان قرار دهیم و تجربه‌ای متفاوت داشته باشیم. هر دو گونه ریورب جایگاهی خاص در اکثر پروژه‌های موسیقی دارند و داشتن حداقل یک نمونه از هر کدام در سیستم شما ضروری می‌باشد."
+  },
+  {
+   "t": "image",
+   "id": "kv4pm8",
+   "src": "/assets/img/convolution-vs-algorithmic-reverbs/4.webp",
+   "alt": "پلاگین کانولوشن ریورب آلتیورب",
+   "caption": "AudioEase Altiverb"
+  },
+  {
+   "t": "image",
+   "id": "kumhzp",
+   "src": "/assets/img/convolution-vs-algorithmic-reverbs/5.webp",
+   "alt": "پلاگین ریورب لیکوئید سونیکس",
+   "caption": "LiquidSonics Reverberate"
+  },
+  {
+   "t": "image",
+   "id": "kdsdtz",
+   "src": "/assets/img/convolution-vs-algorithmic-reverbs/6.webp",
+   "alt": "پلاگین پلیت ریورب یونیورسال آیدیو",
+   "caption": "Universal Audio EMT 140"
+  },
+  {
+   "t": "heading",
+   "id": "ktmg2k",
+   "level": 2,
+   "text": "معرفی پلاگین‌های پیشنهادی ریورب"
+  },
+  {
+   "t": "heading",
+   "id": "k8la3v",
+   "level": 3,
+   "text": "ریورب‌های الگوریتمیک پیشنهادی"
+  },
+  {
+   "t": "list",
+   "id": "kuifcm",
+   "text": "Lexicon PCM Native Reverb\nUniversal Audio EMT 250"
+  },
+  {
+   "t": "heading",
+   "id": "kltly0",
+   "level": 3,
+   "text": "کانولوشن ریورب‌های پیشنهادی"
+  },
+  {
+   "t": "list",
+   "id": "krqgoa",
+   "text": "AudioEase Altiverb\nLiquidSonics Reverberate\nUniversal Audio EMT 140"
+  },
+  {
+   "t": "divider",
+   "id": "kyz2q6"
+  },
+  {
+   "t": "paragraph",
+   "id": "k3sfqe",
+   "text": "اگر مایل به شرکت در کلاس‌های خصوصی [آهنگسازی و تنظیم](/compose/)، میکس و مسترینگ و همچنین انجام پروژه‌های خود هستید، می‌توانید با شماره 09378323674 تماس بگیرید."
+  }
+ ],
+ "related": [],
+ "align": "justify",
+ "seo": {
+  "title": "کانولوشن و الگوریتمیک ریورب ها چه تفاوتی دارند؟",
+  "desc": "آشنایی با تفاوت‌های کانولوشن و الگوریتمیک ریورب ها، نحوه کارکرد آن‌ها و معرفی بهترین پلاگین‌های ریورب برای آهنگسازی و میکس و مسترینگ.",
+  "noindex": false,
+  "kw": "کانولوشن و الگوریتمیک ریورب ها"
+ }
+}
