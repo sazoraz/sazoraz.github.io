@@ -2,6 +2,16 @@
  "posts": [
   {
    "cat": "compose",
+   "title": "تنظیم صحیح مانیتورینگ های Near Field در استودیو",
+   "desc": "راهنمای کامل تنظیم صحیح مانیتورینگ های Near Field و جایگذاری مناسب در استودیو برای دستیابی به بهترین نقطه شنیداری یا همان Sweet Spot.",
+   "img": "/assets/img/near-field-monitors-placement-guide/1.webp",
+   "tag": "آهنگسازی",
+   "meta": "3 دقیقه مطالعه",
+   "href": "/compose/near-field-monitors-placement-guide/",
+   "date": "2014-04-18"
+  },
+  {
+   "cat": "compose",
    "title": "نسل جدید میکروفن و زنجیره ضبط؛ معرفی سیستم VMS",
    "desc": "با سیستم VMS از کمپانی اسلیت دیجیتال آشنا شوید؛ پکیجی شامل میکروفن، پری‌امپ و پلاگین برای شبیه سازی دقیق برترین میکروفن‌های کلاسیک جهان.",
    "img": "/assets/img/nasle-jadid-microphone-va-zanjire-zabt-vms/1.webp",
