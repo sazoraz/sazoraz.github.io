@@ -2,6 +2,16 @@
  "posts": [
   {
    "cat": "compose",
+   "title": "شروع آهنگسازی و تنظیم حرفه‌ای (بخش دوم)",
+   "desc": "در بخش دوم راهنمای شروع آهنگسازی و تنظیم، به بررسی تکنیک‌های ساخت ملودی، انتخاب نرم‌افزار DAW مناسب و تجهیزات سخت‌افزاری می‌پردازیم.",
+   "img": "/assets/img/shoro-ahang-sazi-va-tanzim-bakhsh-2/1.webp",
+   "tag": "آموزش",
+   "meta": "3 دقیقه مطالعه",
+   "href": "/compose/shoro-ahang-sazi-va-tanzim-bakhsh-2/",
+   "date": "2014-06-17"
+  },
+  {
+   "cat": "compose",
    "title": "تنظیم صحیح مانیتورینگ های Near Field در استودیو",
    "desc": "راهنمای کامل تنظیم صحیح مانیتورینگ های Near Field و جایگذاری مناسب در استودیو برای دستیابی به بهترین نقطه شنیداری یا همان Sweet Spot.",
    "img": "/assets/img/near-field-monitors-placement-guide/1.webp",
