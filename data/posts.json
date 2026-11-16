@@ -2,6 +2,16 @@
  "posts": [
   {
    "cat": "compose",
+   "title": "آموزش Quick Controls در کیوبیس؛ کنترل سریع VSTi",
+   "desc": "آموزش Quick Controls در کیوبیس برای کنترل سریع پارامترهای VSTi و پلاگین‌ها با استفاده از اسلایدرها و دکمه‌های میدی‌کیبورد به صورت گام‌به‌گام.",
+   "img": "/assets/img/quick-controls-in-cubase/1.webp",
+   "tag": "آموزش کیوبیس",
+   "meta": "3 دقیقه مطالعه",
+   "href": "/compose/quick-controls-in-cubase/",
+   "date": "2014-08-08"
+  },
+  {
+   "cat": "compose",
    "title": "شروع آهنگسازی و تنظیم حرفه‌ای (بخش دوم)",
    "desc": "در بخش دوم راهنمای شروع آهنگسازی و تنظیم، به بررسی تکنیک‌های ساخت ملودی، انتخاب نرم‌افزار DAW مناسب و تجهیزات سخت‌افزاری می‌پردازیم.",
    "img": "/assets/img/shoro-ahang-sazi-va-tanzim-bakhsh-2/1.webp",
