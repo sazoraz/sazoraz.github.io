@@ -2,6 +2,16 @@
  "posts": [
   {
    "cat": "compose",
+   "title": "بررسی امکانات و ویژگی‌های جدید نرم‌افزار Cubase 8",
+   "desc": "آشنایی با قابلیت‌های جدید و پیشرفت‌های نسخه جدید نرم‌افزار آهنگسازی Cubase 8 Pro و Cubase Artist 8، بهبود کارایی و پلاگین‌های جدید.",
+   "img": "/assets/img/cubase-8-features-review/1.webp",
+   "tag": "آموزش",
+   "meta": "3 دقیقه مطالعه",
+   "href": "/compose/cubase-8-features-review/",
+   "date": "2014-12-12"
+  },
+  {
+   "cat": "compose",
    "title": "آموزش اجرای بانک های Kontakt و آشنایی با انواع فرمت‌ها",
    "desc": "با نحوه باز کردن بانک های کانتکت و اجرای فرمت‌های مختلف این سمپلر محبوب در نرم‌افزار آهنگسازی آشنا شوید و مشکلات اجرای آن‌ها را حل کنید.",
    "img": "/assets/img/how-to-load-kontakt-libraries/1.webp",
