@@ -1,0 +1,170 @@
+{
+ "slug": "cubase-8-features-review",
+ "cat": "compose",
+ "title": "بررسی امکانات و ویژگی‌های جدید نرم‌افزار Cubase 8",
+ "desc": "آشنایی با قابلیت‌های جدید و پیشرفت‌های نسخه جدید نرم‌افزار آهنگسازی Cubase 8 Pro و Cubase Artist 8، بهبود کارایی و پلاگین‌های جدید.",
+ "tag": "آموزش",
+ "img": "/assets/img/cubase-8-features-review/1.webp",
+ "imgAlt": "",
+ "date": "2014-12-12",
+ "updated": "2023-06-02",
+ "author": "دامون آرمانی نژاد",
+ "comments": true,
+ "blocks": [
+  {
+   "t": "paragraph",
+   "id": "k7kw4x",
+   "text": "نرم‌افزار Cubase 8 با انتشار نسخه‌های جدید Cubase 8 Pro و Cubase Artist 8 تغییرات و امکانات چشمگیری را به دنیای تولید موسیقی معرفی کرد. کمپانی اشتاینبرگ پسوند Pro را برای نشان دادن همکاری با افراد حرفه‌ای در سراسر جهان به این نسخه اضافه کرده است."
+  },
+  {
+   "t": "heading",
+   "id": "ky6axe",
+   "level": 2,
+   "text": "تفاوت دو ورژن Cubase 8 Pro و Cubase Artist 8"
+  },
+  {
+   "t": "paragraph",
+   "id": "kit6tc",
+   "text": "نسخه Cubase Artist برای آهنگسازان و موزیسین‌هایی طراحی شده است که بودجه کمتری دارند اما به ابزاری حرفه‌ای نیاز دارند. در مقابل، نسخه پرو تمامی قابلیت‌های نسخه آرتیست را به همراه ابزارهای پیشرفته‌تری ارائه می‌دهد."
+  },
+  {
+   "t": "list",
+   "id": "k7t967",
+   "text": "ابزار کامل نت‌نویسی در بخش Scoring Editor\nصدای ساراند مناسب برای آهنگسازان موسیقی فیلم\nابزار VariAudio برای تصحیح کوک صدا\nقابلیت VCA Faders برای مدیریت بهتر کانال‌ها\nکنترل روم (Control Room) برای مدیریت مانیتورینگ هنرمندان در استودیو\nقابلیت VST Connect SE برای ضبط و کنترل از راه دور"
+  },
+  {
+   "t": "heading",
+   "id": "k63hab",
+   "level": 2,
+   "text": "ویژگی‌های جدید در بخش MixConsole"
+  },
+  {
+   "t": "paragraph",
+   "id": "k51nak",
+   "text": "مهم‌ترین تغییر در بخش میکس‌کنسول، اضافه شدن قابلیت VCA Faders است. این ویژگی به شما اجازه می‌دهد بدون نیاز به لینک و آنلینک کردن مداوم کانال‌ها، حرکت گروهی ولوم‌ها را با حفظ فاصله نسبی کنترل کنید."
+  },
+  {
+   "t": "image",
+   "id": "kgl7gj",
+   "src": "/assets/img/cubase-8-features-review/2.webp",
+   "alt": "نمایش VCA Fader در میکس‌کنسول کیوبیس 8",
+   "caption": "VCA Fader"
+  },
+  {
+   "t": "paragraph",
+   "id": "k21nor",
+   "text": "همچنین قابلیت Wave Meter به شما این امکان را می‌دهد که شکل دیداری موج صوتی خود را مستقیماً در کنسول مشاهده کنید."
+  },
+  {
+   "t": "image",
+   "id": "km57r5",
+   "src": "/assets/img/cubase-8-features-review/3.webp",
+   "alt": "نمایش Wave Meter در نرم‌افزار کیوبیس 8",
+   "caption": "Wave Meter"
+  },
+  {
+   "t": "heading",
+   "id": "k251ji",
+   "level": 2,
+   "text": "بهبود کارایی و عملکرد سیستم با Asio Guard"
+  },
+  {
+   "t": "paragraph",
+   "id": "kli8xg",
+   "text": "قابلیت ارزشمند Asio Guard میزان مصرف CPU و انرژی سیستم را به شکل چشمگیری کاهش می‌دهد. این تکنولوژی به شما اجازه می‌دهد پلاگین‌ها و وی‌اس‌تی‌های بیشتری را با کمترین فشار روی سیستم اجرا کنید."
+  },
+  {
+   "t": "image",
+   "id": "kbm9bd",
+   "src": "/assets/img/cubase-8-features-review/4.webp",
+   "alt": "تنظیمات Asio Guard برای کاهش مصرف CPU",
+   "caption": "Asio Guard"
+  },
+  {
+   "t": "heading",
+   "id": "kbua8m",
+   "level": 2,
+   "text": "قابلیت‌های جدید محیط اصلی پروژه"
+  },
+  {
+   "t": "paragraph",
+   "id": "k0sqpp",
+   "text": "بخش Rack Zone به منظور نمایش وی‌اس‌تی‌ها به صورت یک رک سخت افزاری زیرهم اضافه شده است که محیط کار را بسیار زیباتر می‌کند. همچنین ابزار Chord Pad چرخه آکوردها را در اختیار شما می‌گذارد تا بتوانید آن‌ها را به صورت پشت سر هم در پروژه اجرا کنید."
+  },
+  {
+   "t": "image",
+   "id": "kyyjlt",
+   "src": "/assets/img/cubase-8-features-review/5.webp",
+   "alt": "پد آکورد یا Chord Pad در کیوبیس 8",
+   "caption": "Chord Pad"
+  },
+  {
+   "t": "paragraph",
+   "id": "ki216u",
+   "text": "با قابلیت Render In Place می‌توانید بخش‌های میدی را انتخاب کرده و به راحتی به فایل صوتی (Wave) تبدیل کنید. برای کسب اطلاعات بیشتر درباره ابزارهای ساخت موسیقی، می‌توانید به [آرشیو آهنگسازی و تنظیم](/compose/) مراجعه کنید."
+  },
+  {
+   "t": "image",
+   "id": "ko6w60",
+   "src": "/assets/img/cubase-8-features-review/6.webp",
+   "alt": "قابلیت Render In Place در کیوبیس 8",
+   "caption": "Render In Place"
+  },
+  {
+   "t": "heading",
+   "id": "kgkwvi",
+   "level": 2,
+   "text": "پلاگین‌ها و افکت‌های جدید"
+  },
+  {
+   "t": "paragraph",
+   "id": "krb3to",
+   "text": "در نسخه جدید، پلاگین Bass Amp مشابه Amp Rack برای گیتار اضافه شده است که کیفیت فوق‌العاده‌ای دارد. همچنین مولتی‌باند کمپرسور جدید، مولتی‌باند Envelope Shaper و Expander به مجموعه پلاگین‌ها اضافه شده‌اند."
+  },
+  {
+   "t": "image",
+   "id": "kbfej8",
+   "src": "/assets/img/cubase-8-features-review/7.webp",
+   "alt": "پلاگین Bass Amp در نرم‌افزار Cubase 8",
+   "caption": "Bass Amp"
+  },
+  {
+   "t": "paragraph",
+   "id": "kphbvq",
+   "text": "وی‌اس‌تی جدید Quadrafuzz v2 به عنوان یک مولتی‌باند دیستورشن و Saturation با پنچ حالت مختلف ارائه شده است. در نهایت، Groove Agent SE 4 نیز با بانک‌های درامز آکوستیک باکیفیت در دسترس کاربران قرار دارد."
+  },
+  {
+   "t": "image",
+   "id": "kjz5en",
+   "src": "/assets/img/cubase-8-features-review/8.webp",
+   "alt": "پلاگین Quadrafuzz v2 در کیوبیس 8",
+   "caption": "Quadrafuzz v2"
+  },
+  {
+   "t": "image",
+   "id": "k09z33",
+   "src": "/assets/img/cubase-8-features-review/9.webp",
+   "alt": "مجموعه Groove Agent SE 4 در Cubase 8",
+   "caption": "Groove Agent SE 4"
+  },
+  {
+   "t": "heading",
+   "id": "k6psv8",
+   "level": 2,
+   "text": "جمع‌بندی"
+  },
+  {
+   "t": "paragraph",
+   "id": "k85d5h",
+   "text": "نسخه جدید Cubase 8 با امکانات کلیدی و کاربردی خود توانسته تحول بزرگی در روند تولید موسیقی ایجاد کند. "
+  }
+ ],
+ "related": [],
+ "align": "justify",
+ "seo": {
+  "title": "بررسی ویژگی‌های جدید نرم‌افزار Cubase 8 و نسخه Pro",
+  "desc": "با امکانات جدید نرم‌افزار Cubase 8 از جمله VCA Faders، قابلیت Asio Guard و پلاگین‌های حرفه‌ای در نسخه پرو و آرتیست آشنا شوید.",
+  "noindex": false,
+  "kw": "Cubase 8"
+ }
+}
