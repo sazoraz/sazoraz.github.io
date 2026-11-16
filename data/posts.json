@@ -2,6 +2,16 @@
  "posts": [
   {
    "cat": "compose",
+   "title": "بهترین تجهیزات و ابزارهای موسیقی سال ۲۰۱۴ به انتخاب MusicTech",
+   "desc": "بررسی بهترین تجهیزات و ابزارهای موسیقی سال ۲۰۱۴ شامل نرم‌افزارها، مانیتورینگ‌ها، میکروفون‌ها و کنترلرها به انتخاب کاربران و ماهنامه معتبر MusicTech.",
+   "img": "/assets/img/best-music-production-gear-2014/1.webp",
+   "tag": "تجهیزات موسیقی",
+   "meta": "3 دقیقه مطالعه",
+   "href": "/compose/best-music-production-gear-2014/",
+   "date": "2015-01-10"
+  },
+  {
+   "cat": "compose",
    "title": "بررسی امکانات و ویژگی‌های جدید نرم‌افزار Cubase 8",
    "desc": "آشنایی با قابلیت‌های جدید و پیشرفت‌های نسخه جدید نرم‌افزار آهنگسازی Cubase 8 Pro و Cubase Artist 8، بهبود کارایی و پلاگین‌های جدید.",
    "img": "/assets/img/cubase-8-features-review/1.webp",
